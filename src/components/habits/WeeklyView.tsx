@@ -72,13 +72,13 @@ export default function WeeklyView() {
   }, [weekDaysInfo]);
 
   return (
-    <div className="w-full max-w-md mx-auto flex flex-col gap-6 px-4 py-6 md:py-8">
+    <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 px-4 py-6 md:py-8">
       {/* Header */}
       <div className="flex flex-col">
-        <h2 className="text-xl font-bold tracking-tight text-black dark:text-white">
+        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black dark:text-white">
           Weekly Consistency
         </h2>
-        <p className="text-xs text-muted-text mt-0.5">{formattedWeekRange}</p>
+        <p className="text-xs md:text-sm text-muted-text mt-0.5">{formattedWeekRange}</p>
       </div>
 
       {/* Habit Cards */}
@@ -98,37 +98,37 @@ export default function WeeklyView() {
             return (
               <div
                 key={habit._id}
-                className="flex flex-col p-4 rounded-2xl border border-border bg-card-bg hover:border-zinc-400 dark:hover:border-zinc-700 transition-all gap-4"
+                className="flex flex-col md:flex-row md:items-center md:justify-between p-4 rounded-2xl border border-border bg-card-bg hover:border-zinc-400 dark:hover:border-zinc-700 transition-all gap-4"
               >
-                {/* Top Row: Info & Stats */}
-                <div className="flex items-start justify-between">
+                {/* Info & Stats Section */}
+                <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-2 min-w-0 md:w-1/3">
                   <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-bold text-black dark:text-white truncate">
+                    <span className="text-sm md:text-base font-bold text-black dark:text-white truncate">
                       {habit.name}
                     </span>
                     {habit.description && (
-                      <span className="text-[10px] text-muted-text truncate mt-0.5 max-w-[220px]">
+                      <span className="text-[10px] md:text-xs text-muted-text truncate mt-0.5 max-w-[220px] md:max-w-xs">
                         {habit.description}
                       </span>
                     )}
                   </div>
 
                   {/* Streaks */}
-                  <div className="flex items-center gap-1.5 shrink-0 select-none">
+                  <div className="flex items-center gap-1.5 shrink-0 select-none md:mt-1.5">
                     {currentStreak > 0 && (
-                      <div className="flex items-center gap-0.5 px-2 py-0.5 rounded-full border border-border bg-muted-bg text-[9px] font-bold text-black dark:text-white">
+                      <div className="flex items-center gap-0.5 px-2 py-0.5 rounded-full border border-border bg-muted-bg text-[9px] md:text-xs font-bold text-black dark:text-white">
                         <Flame className="w-2.5 h-2.5 fill-black dark:fill-white text-black dark:text-white" />
                         <span>{currentStreak}d</span>
                       </div>
                     )}
-                    <span className="text-[9px] font-medium text-muted-text border border-border px-1.5 py-0.5 rounded-full bg-muted-bg">
+                    <span className="text-[9px] md:text-xs font-medium text-muted-text border border-border px-1.5 py-0.5 rounded-full bg-muted-bg">
                       Best: {longestStreak}d
                     </span>
                   </div>
                 </div>
 
-                {/* Bottom Row: 7 days horizontal reel */}
-                <div className="flex justify-between items-center bg-muted-bg/40 dark:bg-muted-bg/10 rounded-xl p-2 border border-border/50">
+                {/* 7 days horizontal reel */}
+                <div className="flex justify-between items-center bg-muted-bg/40 dark:bg-muted-bg/10 rounded-xl p-2 border border-border/50 md:flex-1 md:max-w-xl">
                   {weekDaysInfo.map((day) => {
                     const isCompleted = habit.completedDates.includes(day.dateStr);
                     const isSkipDay = habit.skipDays.includes(day.jsDayIndex);
@@ -148,13 +148,13 @@ export default function WeeklyView() {
                             : "opacity-40 cursor-not-allowed"
                         }`}
                       >
-                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-text">
+                        <span className="text-[9px] md:text-xs font-semibold uppercase tracking-wider text-muted-text">
                           {day.label[0]}
                         </span>
                         
                         {/* Day indicator circle */}
                         <div
-                          className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold mt-1.5 border transition-all ${
+                          className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold mt-1.5 border transition-all ${
                             isCompleted
                               ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black"
                               : isSkipDay
@@ -163,7 +163,7 @@ export default function WeeklyView() {
                           }`}
                         >
                           {isCompleted ? (
-                            <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                            <Check className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[2.5]" />
                           ) : (
                             <span>{day.dayNum}</span>
                           )}

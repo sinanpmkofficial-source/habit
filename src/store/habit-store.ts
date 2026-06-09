@@ -207,6 +207,12 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   toggleHabitCompletion: async (id, date) => {
+    const today = getLocalDateString();
+    if (date > today) {
+      console.warn("Cannot toggle completion for a future date.");
+      return;
+    }
+
     const { dbConnected } = get();
     
     if (dbConnected && !id.startsWith("local_")) {

@@ -53,12 +53,12 @@ export default function Header() {
   ] as const;
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-white/95 backdrop-blur-md dark:bg-black/95 px-4 md:px-8 py-3 flex flex-col gap-3">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-white/95 backdrop-blur-md dark:bg-black/95 px-4 md:px-8 py-3 md:py-4 flex flex-col gap-3">
       {/* Branding and Navigation row */}
       <div className="flex items-center justify-between w-full max-w-5xl mx-auto">
         <div className="flex items-center gap-2">
           <span 
-            className="text-2xl font-extrabold tracking-tighter text-black dark:text-white cursor-pointer select-none"
+            className="text-2xl md:text-3xl font-extrabold tracking-tighter text-black dark:text-white cursor-pointer select-none"
             onClick={() => {
               setSelectedDate(getLocalDateString());
               setActiveTab("daily");
@@ -66,15 +66,15 @@ export default function Header() {
           >
             habit.
           </span>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border border-border bg-muted-bg text-muted-text">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium border border-border bg-muted-bg text-muted-text">
             {dbConnected ? (
               <>
-                <Wifi className="w-3 h-3 text-zinc-900 dark:text-white" />
+                <Wifi className="w-3 h-3 md:w-3.5 md:h-3.5 text-zinc-900 dark:text-white" />
                 <span>Cloud Sync</span>
               </>
             ) : (
               <>
-                <WifiOff className="w-3 h-3 text-zinc-400" />
+                <WifiOff className="w-3 h-3 md:w-3.5 md:h-3.5 text-zinc-400" />
                 <span>Offline</span>
               </>
             )}
@@ -82,7 +82,7 @@ export default function Header() {
         </div>
 
         {/* Desktop navigation tabs */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -90,13 +90,13 @@ export default function Header() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`btn-interactive flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`btn-interactive flex items-center gap-2 px-5 py-2.5 rounded-full text-sm md:text-base font-semibold transition-colors ${
                   isActive
                     ? "bg-black text-white dark:bg-white dark:text-black"
                     : "text-muted-text hover:bg-muted-bg hover:text-black dark:hover:text-white"
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-4 h-4 md:w-4.5 md:h-4.5" />
                 <span>{item.label}</span>
               </button>
             );
@@ -106,24 +106,24 @@ export default function Header() {
 
       {/* Date picker reel - only relevant/helpful in Daily or when transitioning to it */}
       {activeTab === "daily" && (
-        <div className="w-full max-w-5xl mx-auto flex items-center justify-center py-1">
-          <div className="flex items-center justify-between gap-1 w-full max-w-md">
+        <div className="w-full max-w-5xl mx-auto flex items-center justify-center py-1 md:py-2">
+          <div className="flex items-center justify-between gap-1 w-full max-w-md md:max-w-lg">
             {dateReel.map((day) => {
               const isSelected = day.dateStr === selectedDate;
               return (
                 <button
                   key={day.dateStr}
                   onClick={() => handleDateClick(day.dateStr)}
-                  className={`btn-interactive flex flex-col items-center justify-center w-11 h-14 rounded-xl border select-none transition-all ${
+                  className={`btn-interactive flex flex-col items-center justify-center w-11 h-14 md:w-13 md:h-16 rounded-xl border select-none transition-all ${
                     isSelected
                       ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black"
                       : "bg-transparent border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
                   }`}
                 >
-                  <span className="text-[10px] font-medium uppercase tracking-wider">
+                  <span className="text-[10px] md:text-xs font-medium uppercase tracking-wider">
                     {day.dayName}
                   </span>
-                  <span className="text-sm font-bold mt-0.5 relative">
+                  <span className="text-sm md:text-base font-bold mt-0.5 relative">
                     {day.dayNum}
                     {day.isToday && (
                       <span
