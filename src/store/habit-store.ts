@@ -111,7 +111,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   addHabit: async (name, description, skipDays) => {
-    const { dbConnected, habits } = get();
+    const { dbConnected } = get();
     
     if (dbConnected) {
       try {
@@ -124,30 +124,31 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         if (!response.ok) throw new Error("Failed to create habit");
         const data = await response.json();
         
-        set({ habits: [...habits, data.habit] });
+        set((state) => ({ habits: [...state.habits, data.habit] }));
       } catch (error) {
         console.error("Error creating habit, falling back to local:", error);
-        // If DB fails midway, we continue
       }
     } else {
       // Local storage fallback
-      const newHabit: Habit = {
-        _id: `local_${Date.now()}`,
-        name,
-        description,
-        skipDays,
-        createdAt: getLocalDateString(),
-        completedDates: [],
-      };
-      
-      const updatedHabits = [...habits, newHabit];
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
-      set({ habits: updatedHabits });
+      set((state) => {
+        const newHabit: Habit = {
+          _id: `local_${Date.now()}`,
+          name,
+          description,
+          skipDays,
+          createdAt: getLocalDateString(),
+          completedDates: [],
+        };
+        
+        const updatedHabits = [...state.habits, newHabit];
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
+        return { habits: updatedHabits };
+      });
     }
   },
 
   updateHabit: async (id, name, description, skipDays) => {
-    const { dbConnected, habits } = get();
+    const { dbConnected } = get();
     
     if (dbConnected && !id.startsWith("local_")) {
       try {
@@ -160,24 +161,26 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         if (!response.ok) throw new Error("Failed to update habit");
         const data = await response.json();
         
-        set({
-          habits: habits.map((h) => (h._id === id ? data.habit : h)),
-        });
+        set((state) => ({
+          habits: state.habits.map((h) => (h._id === id ? data.habit : h)),
+        }));
       } catch (error) {
         console.error("Error updating habit:", error);
       }
     } else {
       // Local storage fallback
-      const updatedHabits = habits.map((h) =>
-        h._id === id ? { ...h, name, description, skipDays } : h
-      );
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
-      set({ habits: updatedHabits });
+      set((state) => {
+        const updatedHabits = state.habits.map((h) =>
+          h._id === id ? { ...h, name, description, skipDays } : h
+        );
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
+        return { habits: updatedHabits };
+      });
     }
   },
 
   deleteHabit: async (id) => {
-    const { dbConnected, habits } = get();
+    const { dbConnected } = get();
     
     if (dbConnected && !id.startsWith("local_")) {
       try {
@@ -187,38 +190,42 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         
         if (!response.ok) throw new Error("Failed to delete habit");
         
-        set({
-          habits: habits.filter((h) => h._id !== id),
-        });
+        set((state) => ({
+          habits: state.habits.filter((h) => h._id !== id),
+        }));
       } catch (error) {
         console.error("Error deleting habit:", error);
       }
     } else {
       // Local storage fallback
-      const updatedHabits = habits.filter((h) => h._id !== id);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
-      set({ habits: updatedHabits });
+      set((state) => {
+        const updatedHabits = state.habits.filter((h) => h._id !== id);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
+        return { habits: updatedHabits };
+      });
     }
   },
 
   toggleHabitCompletion: async (id, date) => {
-    const { dbConnected, habits } = get();
+    const { dbConnected } = get();
     
     if (dbConnected && !id.startsWith("local_")) {
       try {
         // Optimistic UI update
-        const targetHabit = habits.find((h) => h._id === id);
-        if (!targetHabit) return;
-        
-        const isCompleted = targetHabit.completedDates.includes(date);
-        const updatedDates = isCompleted
-          ? targetHabit.completedDates.filter((d) => d !== date)
-          : [...targetHabit.completedDates, date];
+        set((state) => {
+          const targetHabit = state.habits.find((h) => h._id === id);
+          if (!targetHabit) return {};
           
-        set({
-          habits: habits.map((h) =>
-            h._id === id ? { ...h, completedDates: updatedDates } : h
-          ),
+          const isCompleted = targetHabit.completedDates.includes(date);
+          const updatedDates = isCompleted
+            ? targetHabit.completedDates.filter((d) => d !== date)
+            : [...targetHabit.completedDates, date];
+            
+          return {
+            habits: state.habits.map((h) =>
+              h._id === id ? { ...h, completedDates: updatedDates } : h
+            ),
+          };
         });
 
         const response = await fetch(`/api/habits/${id}/toggle`, {
@@ -231,9 +238,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         const data = await response.json();
         
         // Update state with server response just in case
-        set({
-          habits: habits.map((h) => (h._id === id ? data.habit : h)),
-        });
+        set((state) => ({
+          habits: state.habits.map((h) => (h._id === id ? data.habit : h)),
+        }));
       } catch (error) {
         console.error("Error toggling completion:", error);
         // Revert store state on error
@@ -241,22 +248,24 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       }
     } else {
       // Local storage fallback
-      const updatedHabits = habits.map((h) => {
-        if (h._id !== id) return h;
-        
-        const isCompleted = h.completedDates.includes(date);
-        const updatedDates = isCompleted
-          ? h.completedDates.filter((d) => d !== date)
-          : [...h.completedDates, date];
+      set((state) => {
+        const updatedHabits = state.habits.map((h) => {
+          if (h._id !== id) return h;
           
-        return {
-          ...h,
-          completedDates: updatedDates,
-        };
+          const isCompleted = h.completedDates.includes(date);
+          const updatedDates = isCompleted
+            ? h.completedDates.filter((d) => d !== date)
+            : [...h.completedDates, date];
+            
+          return {
+            ...h,
+            completedDates: updatedDates,
+          };
+        });
+        
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
+        return { habits: updatedHabits };
       });
-      
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
-      set({ habits: updatedHabits });
     }
   },
 
