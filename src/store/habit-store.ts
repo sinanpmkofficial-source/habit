@@ -18,7 +18,7 @@ interface HabitState {
   setActiveTab: (tab: "daily" | "weekly" | "monthly" | "settings") => void;
   
   // Storage actions
-  clearAllLocalData: () => void;
+  clearAllData: () => Promise<void>;
   seedLocalMockData: () => void;
 }
 
@@ -264,7 +264,21 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   
   setActiveTab: (tab) => set({ activeTab: tab }),
 
-  clearAllLocalData: () => {
+  clearAllData: async () => {
+    const { dbConnected } = get();
+    
+    if (dbConnected) {
+      try {
+        const response = await fetch("/api/habits", {
+          method: "DELETE",
+        });
+        if (!response.ok) throw new Error("Failed to clear habits from database");
+      } catch (error) {
+        console.error("Error clearing habits from database:", error);
+        // Continue to clear local state anyway
+      }
+    }
+    
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     set({ habits: [] });
   },

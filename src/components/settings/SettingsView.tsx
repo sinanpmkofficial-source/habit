@@ -15,7 +15,7 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
     habits,
     dbConnected,
     deleteHabit,
-    clearAllLocalData,
+    clearAllData,
     seedLocalMockData,
     fetchHabits,
   } = useHabitStore();
@@ -92,8 +92,8 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
   };
 
   // Safe Purge
-  const handleClearData = () => {
-    clearAllLocalData();
+  const handleClearData = async () => {
+    await clearAllData();
     setShowDeleteConfirm(false);
     setImportStatus({ type: "success", message: "All data cleared successfully." });
     setTimeout(() => setImportStatus(null), 3000);
@@ -124,7 +124,7 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
             </p>
           ) : (
             <p>
-              Running in <span className="font-semibold text-black dark:text-white">Offline Mode</span>. Data is cached locally in your browser. Connect to MongoDB by setting the <code className="bg-muted-bg px-1 py-0.5 rounded text-[10px] font-mono">MONGODB_URI</code> environment variable in your project's root folder.
+              Running in <span className="font-semibold text-black dark:text-white">Offline Mode</span>. Data is cached locally in your browser. Connect to MongoDB by setting the <code className="bg-muted-bg px-1 py-0.5 rounded text-[10px] font-mono">MONGODB_URI</code> environment variable in your project&apos;s root folder.
             </p>
           )}
         </div>
