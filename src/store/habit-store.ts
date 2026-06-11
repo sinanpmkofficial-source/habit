@@ -4,6 +4,7 @@ import { Habit, getLocalDateString } from "@/lib/habit-utils";
 interface HabitState {
   habits: Habit[];
   isLoading: boolean;
+  isSyncing: boolean;
   dbConnected: boolean;
   selectedDate: string;
   activeTab: "daily" | "weekly" | "monthly" | "settings";
@@ -16,6 +17,7 @@ interface HabitState {
   toggleHabitCompletion: (id: string, date: string) => Promise<void>;
   setSelectedDate: (date: string) => void;
   setActiveTab: (tab: "daily" | "weekly" | "monthly" | "settings") => void;
+  reorderHabit: (id: string, direction: "up" | "down") => void;
   
   // Storage actions
   clearAllData: () => Promise<void>;
@@ -42,15 +44,61 @@ const DEFAULT_HABITS = [
   },
 ];
 
+const sortHabitsByCustomOrder = (habitsList: Habit[]) => {
+  if (typeof window === "undefined") return habitsList;
+  const customOrderStr = localStorage.getItem("habit_tracker_custom_order");
+  if (!customOrderStr) return habitsList;
+  try {
+    const customOrder: string[] = JSON.parse(customOrderStr);
+    return [...habitsList].sort((a, b) => {
+      const idxA = customOrder.indexOf(a._id || "");
+      const idxB = customOrder.indexOf(b._id || "");
+      
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return 0;
+    });
+  } catch (e) {
+    console.error("Failed to parse custom order:", e);
+    return habitsList;
+  }
+};
+
 export const useHabitStore = create<HabitState>((set, get) => ({
   habits: [],
-  isLoading: true,
+  isLoading: false,
+  isSyncing: false,
   dbConnected: false,
   selectedDate: getLocalDateString(),
   activeTab: "daily",
 
   fetchHabits: async () => {
-    set({ isLoading: true });
+    // 1. Instantly load from localStorage if available
+    let localHabits: Habit[] = [];
+    if (typeof window !== "undefined") {
+      const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (localData) {
+        try {
+          localHabits = JSON.parse(localData);
+        } catch (e) {
+          console.error("Failed to parse local habits:", e);
+        }
+      }
+
+      // If empty, keep localHabits as empty array
+    }
+
+    localHabits = sortHabitsByCustomOrder(localHabits);
+
+    // Set local habits immediately and start syncing indicator
+    set({
+      habits: localHabits,
+      isSyncing: true,
+      isLoading: false,
+    });
+
+    // 2. Fetch and sync from DB in parallel
     try {
       const response = await fetch("/api/habits");
       if (!response.ok) {
@@ -59,44 +107,23 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       const data = await response.json();
       
       if (data.dbConnected) {
-        set({ habits: data.habits, dbConnected: true, isLoading: false });
+        const sortedHabits = sortHabitsByCustomOrder(data.habits);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(sortedHabits));
+        }
+        set({
+          habits: sortedHabits,
+          dbConnected: true,
+          isSyncing: false,
+        });
       } else {
-        // MongoDB is not connected, fallback to localStorage
         throw new Error("MongoDB not connected on server");
       }
     } catch (error) {
-      console.warn("API unavailable or DB not connected. Falling back to localStorage:", error);
-      
-      // Load from localStorage
-      const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
-      let localHabits: Habit[] = [];
-      
-      if (localData) {
-        try {
-          localHabits = JSON.parse(localData);
-        } catch (e) {
-          console.error("Failed to parse local habits:", e);
-        }
-      }
-      
-      // If local habits are empty, seed default habits locally
-      if (localHabits.length === 0) {
-        const today = getLocalDateString();
-        localHabits = DEFAULT_HABITS.map((item, idx) => ({
-          _id: `local_${Date.now()}_${idx}`,
-          name: item.name,
-          description: item.description,
-          skipDays: item.skipDays,
-          createdAt: today,
-          completedDates: [],
-        }));
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(localHabits));
-      }
-
+      console.warn("API sync failed. Using offline cached data:", error);
       set({
-        habits: localHabits,
         dbConnected: false,
-        isLoading: false,
+        isSyncing: false,
       });
     }
   },
@@ -269,6 +296,28 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   setSelectedDate: (date) => set({ selectedDate: date }),
   
   setActiveTab: (tab) => set({ activeTab: tab }),
+
+  reorderHabit: (id, direction) => {
+    const { habits } = get();
+    const index = habits.findIndex((h) => h._id === id);
+    if (index === -1) return;
+
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= habits.length) return;
+
+    const updatedHabits = [...habits];
+    const temp = updatedHabits[index];
+    updatedHabits[index] = updatedHabits[newIndex];
+    updatedHabits[newIndex] = temp;
+
+    if (typeof window !== "undefined") {
+      const idOrder = updatedHabits.map((h) => h._id!);
+      localStorage.setItem("habit_tracker_custom_order", JSON.stringify(idOrder));
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
+    }
+
+    set({ habits: updatedHabits });
+  },
 
   clearAllData: async () => {
     const { dbConnected } = get();

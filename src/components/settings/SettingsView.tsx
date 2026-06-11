@@ -3,7 +3,7 @@
 import React, { useRef, useState } from "react";
 import { useHabitStore } from "@/store/habit-store";
 import { Habit } from "@/lib/habit-utils";
-import { Database, Download, Upload, Trash2, PenLine, RefreshCw, AlertTriangle, Info } from "lucide-react";
+import { Download, Upload, Trash2, PenLine, AlertTriangle, ArrowUp, ArrowDown } from "lucide-react";
 
 interface SettingsViewProps {
   onEditHabit: (habit: Habit) => void;
@@ -13,11 +13,10 @@ interface SettingsViewProps {
 export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewProps) {
   const {
     habits,
-    dbConnected,
     deleteHabit,
     clearAllData,
-    seedLocalMockData,
     fetchHabits,
+    reorderHabit,
   } = useHabitStore();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -84,13 +83,6 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
     e.target.value = "";
   };
 
-  // Safe Seeding
-  const handleSeedData = () => {
-    seedLocalMockData();
-    setImportStatus({ type: "success", message: "Demo data seeded! Tab over to Analytics to inspect." });
-    setTimeout(() => setImportStatus(null), 3000);
-  };
-
   // Safe Purge
   const handleClearData = async () => {
     await clearAllData();
@@ -143,7 +135,7 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
             </div>
           ) : (
             <div className="flex flex-col border border-border bg-card-bg rounded-2xl divide-y divide-border overflow-hidden">
-              {habits.map((habit) => (
+              {habits.map((habit, index) => (
                 <div key={habit._id} className="flex items-center justify-between p-3.5 bg-card-bg hover:bg-neutral-50/50 dark:hover:bg-zinc-900/20 transition-all">
                   <div className="flex flex-col min-w-0">
                     <span className="text-xs md:text-sm font-bold text-black dark:text-white truncate">
@@ -155,6 +147,24 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    {/* Move Up */}
+                    <button
+                      disabled={index === 0}
+                      onClick={() => reorderHabit(habit._id!, "up")}
+                      className="btn-interactive p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-text disabled:cursor-not-allowed"
+                      title="Move Up"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                    </button>
+                    {/* Move Down */}
+                    <button
+                      disabled={index === habits.length - 1}
+                      onClick={() => reorderHabit(habit._id!, "down")}
+                      className="btn-interactive p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-text disabled:cursor-not-allowed"
+                      title="Move Down"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                    </button>
                     {/* Edit */}
                     <button
                       onClick={() => onEditHabit(habit)}
@@ -180,29 +190,8 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
           )}
         </div>
 
-        {/* Right Column: Connection profile and backup options */}
+        {/* Right Column: backup options */}
         <div className="flex flex-col gap-6">
-          {/* Database/Environment Status */}
-          <div className="flex flex-col p-4 rounded-2xl border border-border bg-card-bg gap-2.5 select-none">
-            <div className="flex items-center gap-2">
-              <Database className="w-4 h-4 text-black dark:text-white" />
-              <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-black dark:text-white">
-                Connection Profile
-              </span>
-            </div>
-            <div className="text-xs md:text-sm text-muted-text leading-relaxed">
-              {dbConnected ? (
-                <p>
-                  Your habits are actively synced with <span className="font-semibold text-black dark:text-white">MongoDB</span>. Changes are saved to your cloud database automatically.
-                </p>
-              ) : (
-                <p>
-                  Running in <span className="font-semibold text-black dark:text-white">Offline Mode</span>. Data is cached locally in your browser. Connect to MongoDB by setting the <code className="bg-muted-bg px-1 py-0.5 rounded text-[10px] font-mono">MONGODB_URI</code> environment variable in your project's root folder.
-                </p>
-              )}
-            </div>
-          </div>
-
           {/* Data Operations */}
           <div className="flex flex-col gap-3">
             <span className="text-[10px] md:text-xs uppercase font-bold tracking-wider text-muted-text">
@@ -235,17 +224,6 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
                 className="hidden"
               />
             </div>
-
-            {/* Demo Seeding */}
-            {!dbConnected && (
-              <button
-                onClick={handleSeedData}
-                className="btn-interactive flex items-center justify-center gap-2 p-3.5 rounded-2xl border border-border bg-card-bg hover:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 text-xs md:text-sm font-bold text-black dark:text-white"
-              >
-                <RefreshCw className="w-4 h-4 md:w-4.5 md:h-4.5 animate-spin-hover" />
-                <span>Seed 5-Day Demo Logs</span>
-              </button>
-            )}
 
             {/* Clear All Data */}
             {!showDeleteConfirm ? (

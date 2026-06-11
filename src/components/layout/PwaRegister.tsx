@@ -4,6 +4,23 @@ import { useEffect } from "react";
 
 export default function PwaRegister() {
   useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+      if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister().then((success) => {
+              if (success) {
+                console.log("Dev Mode: Unregistered active Service Worker to avoid caching loops");
+                // Reload the page once to clear service worker control
+                window.location.reload();
+              }
+            });
+          }
+        });
+      }
+      return;
+    }
+
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       const handleRegister = () => {
         navigator.serviceWorker
