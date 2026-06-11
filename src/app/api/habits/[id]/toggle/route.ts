@@ -13,7 +13,7 @@ export async function POST(
 
     const { id } = await params;
     const body = await request.json();
-    const { date } = body; // Expecting 'YYYY-MM-DD'
+    const { date, completed } = body; // Expecting 'YYYY-MM-DD' and optional 'completed' boolean
 
     if (!date) {
       return NextResponse.json({ error: "Date is required" }, { status: 400 });
@@ -32,13 +32,16 @@ export async function POST(
     const completedDates: string[] = habit.completedDates || [];
     const isCompleted = completedDates.includes(date);
 
+    // If completed is provided, use it; otherwise toggle current state
+    const shouldComplete = completed !== undefined ? completed : !isCompleted;
+
     let updateQuery;
-    if (isCompleted) {
-      // Remove date if already marked completed
-      updateQuery = { $pull: { completedDates: date } };
+    if (shouldComplete) {
+      // Add date if not marked completed, using $addToSet to avoid duplicates
+      updateQuery = { $addToSet: { completedDates: date } };
     } else {
-      // Add date if not marked completed
-      updateQuery = { $push: { completedDates: date } };
+      // Remove date if marked completed
+      updateQuery = { $pull: { completedDates: date } };
     }
 
     const updatedHabit = await db.collection("habits").findOneAndUpdate(

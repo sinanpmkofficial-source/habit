@@ -65,6 +65,9 @@ const sortHabitsByCustomOrder = (habitsList: Habit[]) => {
   }
 };
 
+// Keep track of pending database save timeouts for debouncing habit completion toggles
+const toggleTimeouts: Record<string, NodeJS.Timeout> = {};
+
 export const useHabitStore = create<HabitState>((set, get) => ({
   habits: [],
   isLoading: false,
@@ -234,44 +237,58 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const { dbConnected } = get();
     
     if (dbConnected && !id.startsWith("local_")) {
-      try {
-        // Optimistic UI update
-        set((state) => {
-          const targetHabit = state.habits.find((h) => h._id === id);
-          if (!targetHabit) return {};
+      // 1. Optimistic UI update - happens instantly
+      set((state) => {
+        const targetHabit = state.habits.find((h) => h._id === id);
+        if (!targetHabit) return {};
+        
+        const isCompleted = targetHabit.completedDates.includes(date);
+        const updatedDates = isCompleted
+          ? targetHabit.completedDates.filter((d) => d !== date)
+          : [...targetHabit.completedDates, date];
           
-          const isCompleted = targetHabit.completedDates.includes(date);
-          const updatedDates = isCompleted
-            ? targetHabit.completedDates.filter((d) => d !== date)
-            : [...targetHabit.completedDates, date];
-            
-          return {
-            habits: state.habits.map((h) =>
-              h._id === id ? { ...h, completedDates: updatedDates } : h
-            ),
-          };
-        });
+        return {
+          habits: state.habits.map((h) =>
+            h._id === id ? { ...h, completedDates: updatedDates } : h
+          ),
+        };
+      });
 
-        const response = await fetch(`/api/habits/${id}/toggle`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ date }),
-        });
-        
-        if (!response.ok) throw new Error("Failed to toggle completion");
-        const data = await response.json();
-        
-        // Update state with server response just in case
-        set((state) => ({
-          habits: state.habits.map((h) => (h._id === id ? data.habit : h)),
-        }));
-      } catch (error) {
-        console.error("Error toggling completion:", error);
-        // Revert store state on error
-        get().fetchHabits();
+      // 2. Debounce the API call
+      const timeoutKey = `${id}-${date}`;
+      if (toggleTimeouts[timeoutKey]) {
+        clearTimeout(toggleTimeouts[timeoutKey]);
       }
+
+      toggleTimeouts[timeoutKey] = setTimeout(async () => {
+        delete toggleTimeouts[timeoutKey];
+        try {
+          // Get the current (optimistic) state of completion for this habit
+          const targetHabit = get().habits.find((h) => h._id === id);
+          if (!targetHabit) return;
+          const isCompleted = targetHabit.completedDates.includes(date);
+
+          const response = await fetch(`/api/habits/${id}/toggle`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ date, completed: isCompleted }),
+          });
+          
+          if (!response.ok) throw new Error("Failed to toggle completion");
+          const data = await response.json();
+          
+          // Update state with server response just in case (e.g. to get server-sanitized state)
+          set((state) => ({
+            habits: state.habits.map((h) => (h._id === id ? data.habit : h)),
+          }));
+        } catch (error) {
+          console.error("Error toggling completion:", error);
+          // Revert store state on error
+          get().fetchHabits();
+        }
+      }, 500); // 500ms debounce delay
     } else {
-      // Local storage fallback
+      // Local storage fallback (runs instantly, no debounce needed)
       set((state) => {
         const updatedHabits = state.habits.map((h) => {
           if (h._id !== id) return h;
