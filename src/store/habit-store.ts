@@ -18,7 +18,7 @@ interface HabitState {
   setActiveTab: (tab: "daily" | "weekly" | "monthly" | "settings") => void;
   
   // Storage actions
-  clearAllLocalData: () => void;
+  clearAllData: () => Promise<void>;
   seedLocalMockData: () => void;
 }
 
@@ -59,16 +59,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       const data = await response.json();
       
       if (data.dbConnected) {
-        // If MongoDB is connected and habits list is empty, seed default habits
-        if (data.habits.length === 0) {
-          set({ habits: [], dbConnected: true, isLoading: false });
-          // Seed habits one by one via API
-          for (const item of DEFAULT_HABITS) {
-            await get().addHabit(item.name, item.description, item.skipDays);
-          }
-        } else {
-          set({ habits: data.habits, dbConnected: true, isLoading: false });
-        }
+        set({ habits: data.habits, dbConnected: true, isLoading: false });
       } else {
         // MongoDB is not connected, fallback to localStorage
         throw new Error("MongoDB not connected on server");
@@ -279,7 +270,21 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   
   setActiveTab: (tab) => set({ activeTab: tab }),
 
-  clearAllLocalData: () => {
+  clearAllData: async () => {
+    const { dbConnected } = get();
+    
+    if (dbConnected) {
+      try {
+        const response = await fetch("/api/habits", {
+          method: "DELETE",
+        });
+        if (!response.ok) throw new Error("Failed to clear habits from database");
+      } catch (error) {
+        console.error("Error clearing habits from database:", error);
+        // Continue to clear local state anyway
+      }
+    }
+    
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     set({ habits: [] });
   },

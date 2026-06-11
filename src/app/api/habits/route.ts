@@ -17,10 +17,10 @@ export async function GET() {
     }));
 
     return NextResponse.json({ dbConnected: true, habits: serializedHabits });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to fetch habits from MongoDB:", error);
     return NextResponse.json(
-      { dbConnected: false, habits: [], error: error.message },
+      { dbConnected: false, habits: [], error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
@@ -58,8 +58,25 @@ export async function POST(request: Request) {
         _id: result.insertedId.toString(),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to create habit in MongoDB:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
+  }
+}
+
+export async function DELETE() {
+  try {
+    if (!clientPromise) {
+      return NextResponse.json({ error: "Database not connected" }, { status: 503 });
+    }
+    const client = await clientPromise;
+    const db = client.db("habit-tracker");
+    
+    await db.collection("habits").deleteMany({});
+
+    return NextResponse.json({ dbConnected: true, success: true });
+  } catch (error: unknown) {
+    console.error("Failed to clear habits from MongoDB:", error);
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
   }
 }

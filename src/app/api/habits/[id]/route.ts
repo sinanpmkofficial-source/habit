@@ -22,7 +22,7 @@ export async function PUT(
     const client = await clientPromise;
     const db = client.db("habit-tracker");
 
-    const updateFields: any = {
+    const updateFields = {
       name,
       description: description || "",
       skipDays: Array.isArray(skipDays) ? skipDays : [],
@@ -45,9 +45,9 @@ export async function PUT(
         _id: result._id.toString(),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to update habit in MongoDB:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
   }
 }
 
@@ -74,8 +74,8 @@ export async function DELETE(
     }
 
     return NextResponse.json({ dbConnected: true, success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to delete habit from MongoDB:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { useHabitStore } from "@/store/habit-store";
 import { Habit, calculateStreaks, getWeekdayIndex, isBeforeDate, getLocalDateString } from "@/lib/habit-utils";
 import { Flame, Check, PenLine, Plus, AlertCircle } from "lucide-react";
@@ -11,7 +11,31 @@ interface DailyViewProps {
 }
 
 export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
-  const { habits, selectedDate, toggleHabitCompletion } = useHabitStore();
+  const { habits, selectedDate, setSelectedDate, toggleHabitCompletion } = useHabitStore();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Generate 15 days around the selected date (7 before, 7 after)
+  const dates = React.useMemo(() => {
+    const list = [];
+    
+    // We want a range of dates, let's say 14 days back and 14 days forward from today
+    for (let i = -14; i <= 14; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      list.push(getLocalDateString(d));
+    }
+    return list;
+  }, []);
+
+  // Scroll to the selected date on mount or when selectedDate changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const selectedElement = scrollContainerRef.current.querySelector('[data-selected="true"]');
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      }
+    }
+  }, [selectedDate]);
 
   // Filter habits: must be created on or before the selected date
   const activeHabits = habits.filter((habit) => {
@@ -29,9 +53,10 @@ export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
     const [year, month, day] = selectedDate.split("-").map(Number);
     const date = new Date(year, month - 1, day);
     
-    const isToday = selectedDate === getLocalDateString();
-    const isYesterday = selectedDate === getLocalDateString(new Date(Date.now() - 86400000));
-    const isTomorrow = selectedDate === getLocalDateString(new Date(Date.now() + 86400000));
+    const now = new Date();
+    const isToday = selectedDate === getLocalDateString(now);
+    const isYesterday = selectedDate === getLocalDateString(new Date(now.getTime() - 86400000));
+    const isTomorrow = selectedDate === getLocalDateString(new Date(now.getTime() + 86400000));
 
     let relativeDay = "";
     if (isToday) relativeDay = "Today, ";
@@ -49,17 +74,57 @@ export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
         
         {/* Main Column: Header and Checklist */}
         <div className="md:col-span-2 flex flex-col gap-6">
-          {/* View Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black dark:text-white">
-                Daily View
-              </h2>
-              <p className="text-xs md:text-sm text-muted-text mt-0.5">{formattedHeaderDate}</p>
+          {/* Header row with Slider and New Habit Button */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Date Scroll Picker */}
+            <div className="flex-1 min-w-0 relative group">
+              <div 
+                ref={scrollContainerRef}
+                className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth pb-1 px-1"
+                style={{ scrollSnapType: 'x proximity' }}
+              >
+                {dates.map((dateStr) => {
+                  const [y, m, d] = dateStr.split("-").map(Number);
+                  const dateObj = new Date(y, m - 1, d);
+                  const isSelected = selectedDate === dateStr;
+                  const isToday = dateStr === getLocalDateString();
+                  const dayName = dateObj.toLocaleDateString("en-US", { weekday: "short" });
+                  const dayNum = dateObj.getDate();
+
+                  return (
+                    <button
+                      key={dateStr}
+                      data-selected={isSelected}
+                      onClick={() => setSelectedDate(dateStr)}
+                      className={`flex flex-col items-center min-w-[52px] py-2.5 rounded-2xl border transition-all scroll-snap-align-center ${
+                        isSelected
+                          ? "bg-black dark:bg-white border-black dark:border-white shadow-md"
+                          : "bg-card-bg border-border hover:border-zinc-400 dark:hover:border-zinc-700"
+                      }`}
+                    >
+                      <span className={`text-[10px] font-bold uppercase tracking-tight ${
+                        isSelected ? "text-white/70 dark:text-black/60" : "text-muted-text"
+                      }`}>
+                        {dayName}
+                      </span>
+                      <span className={`text-sm font-bold mt-0.5 ${
+                        isSelected ? "text-white dark:text-black" : "text-black dark:text-white"
+                      }`}>
+                        {dayNum}
+                      </span>
+                      {isToday && !isSelected && (
+                        <div className="w-1 h-1 rounded-full bg-black dark:bg-white mt-1" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+
+            {/* New Habit Button */}
             <button
               onClick={onAddHabit}
-              className="btn-interactive flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-semibold hover:opacity-90 shadow-sm"
+              className="btn-interactive shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-semibold hover:opacity-90 shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>New Habit</span>

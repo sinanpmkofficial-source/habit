@@ -15,7 +15,7 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
     habits,
     dbConnected,
     deleteHabit,
-    clearAllLocalData,
+    clearAllData,
     seedLocalMockData,
     fetchHabits,
   } = useHabitStore();
@@ -92,8 +92,8 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
   };
 
   // Safe Purge
-  const handleClearData = () => {
-    clearAllLocalData();
+  const handleClearData = async () => {
+    await clearAllData();
     setShowDeleteConfirm(false);
     setImportStatus({ type: "success", message: "All data cleared successfully." });
     setTimeout(() => setImportStatus(null), 3000);
@@ -101,7 +101,6 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
 
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 px-4 py-6 md:py-8">
-      {/* Title */}
       <div className="flex flex-col">
         <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black dark:text-white">
           Preferences & Data
