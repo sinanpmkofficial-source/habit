@@ -9,6 +9,7 @@ import DailyView from "@/components/habits/DailyView";
 import WeeklyView from "@/components/habits/WeeklyView";
 import MonthlyView from "@/components/habits/MonthlyView";
 import SettingsView from "@/components/settings/SettingsView";
+import InsightsView from "@/components/habits/InsightsView";
 import HabitModal from "@/components/habits/HabitModal";
 
 export default function Home() {
@@ -89,6 +90,8 @@ export default function Home() {
             onEditHabit={handleEditHabitTrigger}
           />
         );
+      case "insights":
+        return <InsightsView />;
       default:
         return (
           <DailyView

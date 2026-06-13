@@ -7,7 +7,7 @@ interface HabitState {
   isSyncing: boolean;
   dbConnected: boolean;
   selectedDate: string;
-  activeTab: "daily" | "weekly" | "monthly" | "settings";
+  activeTab: "daily" | "weekly" | "monthly" | "settings" | "insights";
   
   // Actions
   fetchHabits: () => Promise<void>;
@@ -16,7 +16,7 @@ interface HabitState {
   deleteHabit: (id: string) => Promise<void>;
   toggleHabitCompletion: (id: string, date: string) => Promise<void>;
   setSelectedDate: (date: string) => void;
-  setActiveTab: (tab: "daily" | "weekly" | "monthly" | "settings") => void;
+  setActiveTab: (tab: "daily" | "weekly" | "monthly" | "settings" | "insights") => void;
   reorderHabit: (id: string, direction: "up" | "down") => void;
   
   // Storage actions

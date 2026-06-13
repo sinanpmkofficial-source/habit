@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useMemo, useRef, useEffect } from "react";
+import React, { useMemo, useRef, useEffect, useState } from "react";
 import { useHabitStore } from "@/store/habit-store";
 import { getLocalDateString } from "@/lib/habit-utils";
-import { Calendar, Layers, BarChart2, Settings, Wifi, WifiOff, RefreshCw } from "lucide-react";
+import { Calendar, Layers, BarChart2, Settings, Wifi, WifiOff, RefreshCw, ChevronDown, TrendingUp } from "lucide-react";
 
 const WEEKDAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -18,6 +18,19 @@ export default function Header() {
   } = useHabitStore();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Generate 29 days around today (14 before, 14 after)
   const dates = useMemo(() => {
@@ -51,7 +64,6 @@ export default function Header() {
     { id: "daily", label: "Daily", icon: Calendar },
     { id: "weekly", label: "Weekly", icon: Layers },
     { id: "monthly", label: "Monthly", icon: BarChart2 },
-    { id: "settings", label: "Settings", icon: Settings },
   ] as const;
 
   return (
@@ -64,6 +76,7 @@ export default function Header() {
             onClick={() => {
               setSelectedDate(getLocalDateString());
               setActiveTab("daily");
+              setDropdownOpen(false);
             }}
           >
             habit.
@@ -89,14 +102,17 @@ export default function Header() {
         </div>
 
         {/* Desktop navigation tabs */}
-        <nav className="hidden md:flex items-center gap-1.5">
+        <nav className="hidden md:flex items-center gap-1.5 relative">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setDropdownOpen(false);
+                  setActiveTab(item.id);
+                }}
                 className={`btn-interactive flex items-center gap-2 px-5 py-2.5 rounded-full text-sm md:text-base font-semibold transition-colors ${
                   isActive
                     ? "bg-black text-white dark:bg-white dark:text-black"
@@ -108,6 +124,50 @@ export default function Header() {
               </button>
             );
           })}
+
+          {/* Desktop More Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className={`btn-interactive flex items-center gap-2 px-5 py-2.5 rounded-full text-sm md:text-base font-semibold transition-colors cursor-pointer select-none ${
+                activeTab === "settings" || activeTab === "insights"
+                  ? "bg-black text-white dark:bg-white dark:text-black"
+                  : "text-muted-text hover:bg-muted-bg hover:text-black dark:hover:text-white"
+              }`}
+            >
+              <ChevronDown className={`w-4 h-4 md:w-4.5 md:h-4.5 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+              <span>More</span>
+            </button>
+            
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-border bg-white/95 dark:bg-black/95 backdrop-blur-md shadow-lg py-2.5 z-50 flex flex-col gap-0.5 animate-fade-in">
+                <button
+                  onClick={() => {
+                    setActiveTab("insights");
+                    setDropdownOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted-bg text-left cursor-pointer w-full ${
+                    activeTab === "insights" ? "text-black dark:text-white bg-muted-bg/50" : "text-muted-text"
+                  }`}
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  <span>Insights</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("settings");
+                    setDropdownOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted-bg text-left cursor-pointer w-full ${
+                    activeTab === "settings" ? "text-black dark:text-white bg-muted-bg/50" : "text-muted-text"
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Settings</span>
+                </button>
+              </div>
+            )}
+          </div>
         </nav>
       </div>
 
