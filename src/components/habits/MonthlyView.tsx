@@ -2,8 +2,10 @@
 
 import React, { useState, useMemo } from "react";
 import { useHabitStore } from "@/store/habit-store";
+import { useTaskStore } from "@/store/task-store";
 import { Habit, calculateStreaks, getWeekdayIndex, isBeforeDate, getLocalDateString, addDays } from "@/lib/habit-utils";
-import { ChevronLeft, ChevronRight, BarChart2, Flame, Percent, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, BarChart2, Flame, Percent, CheckCircle, Calendar as CalendarIcon, CheckSquare } from "lucide-react";
+import ConfirmToggleBar, { PendingToggle } from "@/components/habits/ConfirmToggleBar";
 
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
 const MONTHS = [
@@ -13,6 +15,7 @@ const MONTHS = [
 
 export default function MonthlyView() {
   const { habits, toggleHabitCompletion } = useHabitStore();
+  const { tasks } = useTaskStore();
   
   // Local state for the navigated calendar month & year (defaulting to current date)
   const today = useMemo(() => new Date(), []);
@@ -21,6 +24,23 @@ export default function MonthlyView() {
   
   // Local state for selected habit ID (default to first habit if available)
   const [selectedHabitId, setSelectedHabitId] = useState<string>("");
+  const [pendingToggle, setPendingToggle] = useState<PendingToggle | null>(null);
+
+  const requestToggle = (dateStr: string) => {
+    if (!activeHabit) return;
+    setPendingToggle({
+      habitId: activeHabit._id!,
+      dateStr,
+      habitName: activeHabit.name,
+      isCurrentlyCompleted: activeHabit.completedDates.includes(dateStr),
+    });
+  };
+
+  const handleConfirmToggle = () => {
+    if (!pendingToggle) return;
+    toggleHabitCompletion(pendingToggle.habitId, pendingToggle.dateStr);
+    setPendingToggle(null);
+  };
 
   // Sync selectedHabitId with habits list if empty or invalid
   const activeHabit = useMemo(() => {
@@ -90,6 +110,8 @@ export default function MonthlyView() {
         isToday,
         isFuture,
         jsDayIndex,
+        taskTotal: tasks.filter((t) => t.date === dateStr).length,
+        taskDone: tasks.filter((t) => t.date === dateStr && t.completed).length,
       });
     }
     
@@ -292,10 +314,10 @@ export default function MonthlyView() {
                   const canToggle = !cell.isFuture && !isInactive;
 
                   return (
-                    <div key={cell.dateStr} className="aspect-square flex items-center justify-center">
+                    <div key={cell.dateStr} className="aspect-square flex flex-col items-center justify-center gap-0.5">
                       <button
                         disabled={!canToggle}
-                        onClick={() => toggleHabitCompletion(activeHabit._id!, cell.dateStr)}
+                        onClick={() => requestToggle(cell.dateStr)}
                         className={`btn-interactive w-full max-w-[44px] md:max-w-[48px] aspect-square rounded-full flex flex-col items-center justify-center text-xs md:text-sm font-bold border relative ${
                           isCompleted
                             ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-sm"
@@ -319,6 +341,28 @@ export default function MonthlyView() {
                           />
                         )}
                       </button>
+
+                      {/* Task indicator dots below the habit circle */}
+                      {cell.taskTotal > 0 && (
+                        <div className="flex items-center justify-center gap-0.5 h-2">
+                          {cell.taskDone === cell.taskTotal ? (
+                            // All tasks done — solid filled indicator
+                            <div className="w-1.5 h-1.5 rounded-full bg-black dark:bg-white" />
+                          ) : (
+                            // Partial — show up to 3 hollow dots, filled for done
+                            Array.from({ length: Math.min(cell.taskTotal, 3) }).map((_, i) => (
+                              <div
+                                key={i}
+                                className={`w-1 h-1 rounded-full border ${
+                                  i < cell.taskDone
+                                    ? "bg-black dark:bg-white border-black dark:border-white"
+                                    : "border-zinc-400 dark:border-zinc-600 bg-transparent"
+                                }`}
+                              />
+                            ))
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -328,6 +372,13 @@ export default function MonthlyView() {
         </div>
 
       </div>
+
+      {/* Confirmation bar */}
+      <ConfirmToggleBar
+        pending={pendingToggle}
+        onConfirm={handleConfirmToggle}
+        onCancel={() => setPendingToggle(null)}
+      />
     </div>
   );
 }

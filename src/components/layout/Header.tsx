@@ -32,10 +32,10 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Generate 29 days around today (14 before, 14 after)
+  // Generate 91 days around today (45 before, 45 after)
   const dates = useMemo(() => {
     const list = [];
-    for (let i = -14; i <= 14; i++) {
+    for (let i = -45; i <= 45; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       list.push(getLocalDateString(d));
@@ -174,10 +174,10 @@ export default function Header() {
       {/* Date picker reel - only relevant/helpful in Daily or when transitioning to it */}
       {activeTab === "daily" && (
         <div className="w-full max-w-5xl mx-auto flex items-center justify-center py-1 md:py-2">
-          <div className="relative group w-full max-w-md md:max-w-lg">
-            <div 
+          <div className="relative w-full">
+            <div
               ref={scrollContainerRef}
-              className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth pb-1 px-1"
+              className="flex items-center gap-1.5 md:gap-2 overflow-x-auto no-scrollbar scroll-smooth pb-1 px-1"
               style={{ scrollSnapType: 'x proximity' }}
             >
               {dates.map((dateStr) => {
@@ -187,23 +187,34 @@ export default function Header() {
                 const isToday = dateStr === getLocalDateString();
                 const dayName = dateObj.toLocaleDateString("en-US", { weekday: "short" });
                 const dayNum = dateObj.getDate();
+                const isFirstOfMonth = dayNum === 1;
+                const monthName = dateObj.toLocaleDateString("en-US", { month: "short" });
 
                 return (
                   <button
                     key={dateStr}
                     data-selected={isSelected}
                     onClick={() => setSelectedDate(dateStr)}
-                    className={`flex flex-col items-center min-w-[52px] py-2.5 rounded-2xl border transition-all scroll-snap-align-center ${
+                    className={`flex flex-col items-center min-w-[48px] md:min-w-[56px] py-2 md:py-2.5 rounded-2xl border transition-all scroll-snap-align-center shrink-0 ${
                       isSelected
                         ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-md"
                         : "bg-card-bg border-border hover:border-zinc-400 dark:hover:border-zinc-700 text-muted-text hover:text-black dark:hover:text-white"
                     }`}
                   >
-                    <span className={`text-[10px] font-bold uppercase tracking-tight ${
-                      isSelected ? "text-white/70 dark:text-black/60" : "text-muted-text"
-                    }`}>
-                      {dayName}
-                    </span>
+                    {/* Month label on 1st of month */}
+                    {isFirstOfMonth ? (
+                      <span className={`text-[9px] md:text-[10px] font-extrabold uppercase tracking-tight leading-none mb-0.5 ${
+                        isSelected ? "text-white/80 dark:text-black/60" : "text-black dark:text-white"
+                      }`}>
+                        {monthName}
+                      </span>
+                    ) : (
+                      <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-tight ${
+                        isSelected ? "text-white/70 dark:text-black/60" : "text-muted-text"
+                      }`}>
+                        {dayName}
+                      </span>
+                    )}
                     <span className={`text-sm font-bold mt-0.5 ${
                       isSelected ? "text-white dark:text-black" : "text-black dark:text-white"
                     }`}>

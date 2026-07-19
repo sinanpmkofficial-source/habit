@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useHabitStore } from "@/store/habit-store";
+import { useTaskStore } from "@/store/task-store";
 import { 
   calculateStreaks, 
   getCompletionRate, 
@@ -20,7 +21,10 @@ import {
   Info,
   CalendarDays,
   Target,
-  Sparkles
+  Sparkles,
+  ListTodo,
+  CheckSquare,
+  ClipboardList
 } from "lucide-react";
 
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -28,6 +32,7 @@ const WEEKDAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function InsightsView() {
   const { habits } = useHabitStore();
+  const { tasks } = useTaskStore();
   const todayStr = getLocalDateString();
   const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: string; percentage: number } | null>(null);
 
@@ -77,6 +82,48 @@ export default function InsightsView() {
       bestHabitRate,
     };
   }, [habits, todayStr]);
+
+  // Task stats
+  const taskStats = useMemo(() => {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter((t) => t.completed).length;
+    const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    // This week (Mon–Sun containing today)
+    const todayDate = new Date();
+    const dayIndex = todayDate.getDay();
+    const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
+    const mondayStr = addDays(todayStr, mondayOffset);
+    const sundayStr = addDays(mondayStr, 6);
+
+    const thisWeekTasks = tasks.filter((t) => t.date >= mondayStr && t.date <= sundayStr);
+    const thisWeekDone = thisWeekTasks.filter((t) => t.completed).length;
+
+    return { totalTasks, completedTasks, completionRate, thisWeekTotal: thisWeekTasks.length, thisWeekDone };
+  }, [tasks, todayStr]);
+
+  // 14-day task trend (completions per day)
+  const taskTrendData = useMemo(() => {
+    const list = [];
+    for (let i = 13; i >= 0; i--) {
+      list.push(addDays(todayStr, -i));
+    }
+    return list.map((dateStr) => {
+      const dayTasks = tasks.filter((t) => t.date === dateStr);
+      const done = dayTasks.filter((t) => t.completed).length;
+      const total = dayTasks.length;
+      const [y, m, d] = dateStr.split("-").map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      return {
+        dateStr,
+        label: dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        weekday: WEEKDAYS_SHORT[dateObj.getDay()],
+        done,
+        total,
+        dayNum: d,
+      };
+    });
+  }, [tasks, todayStr]);
 
   // 2. Dynamic 14-Day Completion Trend Data
   const trendData = useMemo(() => {
@@ -626,6 +673,137 @@ export default function InsightsView() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* 4. Task Productivity Section */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] md:text-xs uppercase font-extrabold tracking-wider text-muted-text">
+                Task Productivity
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted-bg border border-border text-muted-text">
+                One-time tasks
+              </span>
+            </div>
+
+            {/* Stat cards */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col p-5 rounded-2xl border border-border bg-card-bg shadow-sm hover:border-black/20 dark:hover:border-white/20 transition-all">
+                <div className="flex items-center justify-between text-muted-text">
+                  <span className="text-[10px] md:text-xs uppercase font-extrabold tracking-wider">Total Done</span>
+                  <CheckSquare className="w-4 h-4 text-emerald-500" />
+                </div>
+                <div className="flex items-baseline gap-1 mt-3.5">
+                  <span className="text-2xl md:text-3xl font-black text-black dark:text-white">
+                    {taskStats.completedTasks}
+                  </span>
+                  <span className="text-xs font-bold text-muted-text">tasks</span>
+                </div>
+                <div className="text-[10px] text-muted-text mt-2">
+                  of {taskStats.totalTasks} scheduled
+                </div>
+              </div>
+
+              <div className="flex flex-col p-5 rounded-2xl border border-border bg-card-bg shadow-sm hover:border-black/20 dark:hover:border-white/20 transition-all">
+                <div className="flex items-center justify-between text-muted-text">
+                  <span className="text-[10px] md:text-xs uppercase font-extrabold tracking-wider">This Week</span>
+                  <ClipboardList className="w-4 h-4 text-blue-500" />
+                </div>
+                <div className="flex items-baseline gap-1 mt-3.5">
+                  <span className="text-2xl md:text-3xl font-black text-black dark:text-white">
+                    {taskStats.thisWeekDone}
+                  </span>
+                  <span className="text-xs font-bold text-muted-text">/ {taskStats.thisWeekTotal}</span>
+                </div>
+                <div className="text-[10px] text-muted-text mt-2">
+                  Completed this week
+                </div>
+              </div>
+
+              <div className="flex flex-col p-5 rounded-2xl border border-border bg-card-bg shadow-sm hover:border-black/20 dark:hover:border-white/20 transition-all">
+                <div className="flex items-center justify-between text-muted-text">
+                  <span className="text-[10px] md:text-xs uppercase font-extrabold tracking-wider">Success Rate</span>
+                  <Target className="w-4 h-4 text-indigo-500" />
+                </div>
+                <div className="flex items-baseline gap-1 mt-3.5">
+                  <span className="text-2xl md:text-3xl font-black text-black dark:text-white">
+                    {taskStats.completionRate}
+                  </span>
+                  <span className="text-xs font-bold text-muted-text">%</span>
+                </div>
+                <div className="text-[10px] text-muted-text mt-2">
+                  All-time completion rate
+                </div>
+              </div>
+            </div>
+
+            {/* 14-day bar chart */}
+            <div className="flex flex-col p-5 rounded-2xl border border-border bg-card-bg shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col">
+                  <span className="text-xs font-extrabold uppercase tracking-wider text-muted-text">14-Day Task Activity</span>
+                  <span className="text-[10px] text-muted-text">Tasks completed per day</span>
+                </div>
+                <ListTodo className="w-4 h-4 text-muted-text" />
+              </div>
+
+              {taskStats.totalTasks === 0 ? (
+                <div className="flex items-center gap-2 py-6 justify-center">
+                  <ListTodo className="w-5 h-5 text-zinc-300 dark:text-zinc-700" />
+                  <span className="text-xs text-muted-text">No tasks recorded yet. Add tasks from the Daily view.</span>
+                </div>
+              ) : (
+                <div className="flex items-end gap-1 h-24 w-full">
+                  {taskTrendData.map((day, i) => {
+                    const maxBar = Math.max(...taskTrendData.map((d) => d.total), 1);
+                    const barHeightPct = day.total > 0 ? (day.total / maxBar) * 100 : 0;
+                    const doneHeightPct = day.done > 0 && day.total > 0 ? (day.done / day.total) * barHeightPct : 0;
+                    const isToday = day.dateStr === todayStr;
+
+                    return (
+                      <div
+                        key={day.dateStr}
+                        title={`${day.label}: ${day.done}/${day.total} tasks done`}
+                        className="flex-1 flex flex-col items-center justify-end gap-0.5 group/bar"
+                      >
+                        {/* Bar */}
+                        <div
+                          className="w-full rounded-t-md relative overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-border/50"
+                          style={{ height: day.total > 0 ? `${Math.max(barHeightPct, 8)}%` : "8%", opacity: day.total > 0 ? 1 : 0.3 }}
+                        >
+                          {/* Done fill */}
+                          <div
+                            className="absolute bottom-0 left-0 right-0 bg-black dark:bg-white rounded-t-md transition-all duration-500"
+                            style={{ height: `${doneHeightPct > 0 ? (day.done / day.total) * 100 : 0}%` }}
+                          />
+                        </div>
+
+                        {/* Day label */}
+                        <span className={`text-[8px] font-bold ${
+                          isToday ? "text-black dark:text-white" : "text-muted-text"
+                        }`}>
+                          {i % 2 === 0 ? day.weekday.slice(0, 1) : ""}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Legend */}
+              {taskStats.totalTasks > 0 && (
+                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded-sm bg-black dark:bg-white" />
+                    <span className="text-[10px] text-muted-text font-semibold">Completed</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded-sm bg-zinc-100 dark:bg-zinc-900 border border-border" />
+                    <span className="text-[10px] text-muted-text font-semibold">Scheduled</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </>

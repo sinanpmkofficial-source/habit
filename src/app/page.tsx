@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useHabitStore } from "@/store/habit-store";
-import { Habit } from "@/lib/habit-utils";
+import { useTaskStore } from "@/store/task-store";
+import { Habit, Task } from "@/lib/habit-utils";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
 import DailyView from "@/components/habits/DailyView";
@@ -11,32 +12,52 @@ import MonthlyView from "@/components/habits/MonthlyView";
 import SettingsView from "@/components/settings/SettingsView";
 import InsightsView from "@/components/habits/InsightsView";
 import HabitModal from "@/components/habits/HabitModal";
+import TaskModal from "@/components/habits/TaskModal";
 
 export default function Home() {
-  const { activeTab, fetchHabits, isLoading } = useHabitStore();
-  
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { activeTab, fetchHabits, isLoading, selectedDate } = useHabitStore();
+  const { fetchTasks } = useTaskStore();
+
+  // Habit modal state
+  const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
-  // Fetch habits on initial mount
+  // Task modal state
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  // Fetch on mount
   useEffect(() => {
     fetchHabits();
-  }, [fetchHabits]);
+    fetchTasks();
+  }, [fetchHabits, fetchTasks]);
 
+  // Habit handlers
   const handleAddHabitTrigger = () => {
     setEditingHabit(null);
-    setIsModalOpen(true);
+    setIsHabitModalOpen(true);
   };
-
   const handleEditHabitTrigger = (habit: Habit) => {
     setEditingHabit(habit);
-    setIsModalOpen(true);
+    setIsHabitModalOpen(true);
+  };
+  const handleCloseHabitModal = () => {
+    setIsHabitModalOpen(false);
+    setEditingHabit(null);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingHabit(null);
+  // Task handlers
+  const handleAddTaskTrigger = () => {
+    setEditingTask(null);
+    setIsTaskModalOpen(true);
+  };
+  const handleEditTaskTrigger = (task: Task) => {
+    setEditingTask(task);
+    setIsTaskModalOpen(true);
+  };
+  const handleCloseTaskModal = () => {
+    setIsTaskModalOpen(false);
+    setEditingTask(null);
   };
 
   // Render active view
@@ -44,13 +65,11 @@ export default function Home() {
     if (isLoading) {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-8 w-full max-w-md mx-auto">
-          {/* Skeleton Loader */}
           <div className="w-full flex flex-col gap-4">
             <div className="flex justify-between items-center mb-2 animate-pulse">
               <div className="h-5 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3" />
               <div className="h-7 bg-zinc-200 dark:bg-zinc-800 rounded-full w-1/4" />
             </div>
-            
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
@@ -77,6 +96,8 @@ export default function Home() {
           <DailyView
             onAddHabit={handleAddHabitTrigger}
             onEditHabit={handleEditHabitTrigger}
+            onAddTask={handleAddTaskTrigger}
+            onEditTask={handleEditTaskTrigger}
           />
         );
       case "weekly":
@@ -97,6 +118,8 @@ export default function Home() {
           <DailyView
             onAddHabit={handleAddHabitTrigger}
             onEditHabit={handleEditHabitTrigger}
+            onAddTask={handleAddTaskTrigger}
+            onEditTask={handleEditTaskTrigger}
           />
         );
     }
@@ -104,22 +127,27 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50/30 dark:bg-black text-black dark:text-zinc-100 pb-20 md:pb-6">
-      {/* Branding and Date Selection Headers */}
       <Header />
 
-      {/* Main Content Area */}
       <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col justify-start">
         {renderActiveView()}
       </main>
 
-      {/* Mobile Sticky Bottom Navigation */}
       <BottomNav />
 
-      {/* Create & Edit Overlay Modal */}
+      {/* Habit Modal */}
       <HabitModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        isOpen={isHabitModalOpen}
+        onClose={handleCloseHabitModal}
         habit={editingHabit}
+      />
+
+      {/* Task Modal */}
+      <TaskModal
+        isOpen={isTaskModalOpen}
+        onClose={handleCloseTaskModal}
+        task={editingTask}
+        defaultDate={selectedDate}
       />
     </div>
   );
