@@ -74,12 +74,12 @@ export default function TaskModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/40 backdrop-blur-xs p-0 md:p-4 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/40 backdrop-blur-xs p-0 md:p-4 animate-fade-in" style={{ height: '100dvh' }}>
       {/* Backdrop */}
       <div className="absolute inset-0 cursor-default" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-h-[90vh] md:max-h-[85vh] md:w-[420px] bg-white dark:bg-[#0a0a0a] border-t md:border border-border rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up z-10">
+      <div className="relative w-full max-h-[90dvh] md:max-h-[85dvh] md:w-[420px] bg-white dark:bg-[#0a0a0a] border-t md:border border-border rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up z-10">
 
         {/* Drag handle (mobile) */}
         <div className="w-12 h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full mx-auto mt-3 mb-1 shrink-0 md:hidden" />
@@ -116,7 +116,6 @@ export default function TaskModal({
             <input
               type="text"
               required
-              autoFocus
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Review project proposal"
@@ -149,7 +148,7 @@ export default function TaskModal({
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-border bg-white dark:bg-[#0a0a0a] flex items-center justify-between shrink-0 gap-3">
+        <div className="px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-border bg-white dark:bg-[#0a0a0a] flex items-center justify-between shrink-0 gap-3">
           {task ? (
             <button
               type="button"

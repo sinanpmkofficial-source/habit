@@ -51,19 +51,37 @@ body {
   transform: scale(0.96);
 }
 
-/* Custom minimal scrollbar */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+/* Custom minimal scrollbar — desktop only */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 9999px;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+/* Hide all scrollbars on touch devices — native app feel */
+@media (pointer: coarse) {
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 9999px;
+/* Prevent pull-to-refresh & overscroll bounce for native feel */
+body {
+  overscroll-behavior: none;
 }
 
 /* Keyframes for sliding and fading */
