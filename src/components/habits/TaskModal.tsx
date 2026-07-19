@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useTaskStore } from "@/store/task-store";
 import { Task } from "@/lib/habit-utils";
-import { X, Trash2, CalendarDays } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
+import DatePicker from "./DatePicker";
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -128,19 +129,7 @@ export default function TaskModal({
             <label className="text-[10px] uppercase font-bold tracking-wider text-muted-text mb-1.5">
               Scheduled Date *
             </label>
-            <div className="relative">
-              <CalendarDays className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-text pointer-events-none" />
-              <input
-                type="date"
-                required
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-border bg-transparent text-sm font-semibold focus:outline-none focus:border-black dark:focus:border-white transition-all text-black dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
-              />
-            </div>
-            <p className="text-[10px] text-muted-text mt-1.5">
-              You can plan tasks for any day — past or future.
-            </p>
+            <DatePicker value={date} onChange={setDate} />
           </div>
 
           {/* Hidden submit */}
