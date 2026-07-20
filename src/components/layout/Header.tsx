@@ -32,10 +32,10 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Generate 91 days around today (45 before, 45 after)
+  // Generate 365 days around today (182 before, 182 after)
   const dates = useMemo(() => {
     const list = [];
-    for (let i = -45; i <= 45; i++) {
+    for (let i = -182; i <= 182; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       list.push(getLocalDateString(d));
@@ -67,9 +67,9 @@ export default function Header() {
   ] as const;
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-white/95 backdrop-blur-md dark:bg-black/95 px-4 md:px-8 py-3 md:py-4 flex flex-col gap-3">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-white/95 backdrop-blur-md dark:bg-black/95 px-4 md:px-6 xl:px-10 py-3 md:py-4 flex flex-col gap-3">
       {/* Branding and Navigation row */}
-      <div className="flex items-center justify-between w-full max-w-5xl mx-auto">
+      <div className="flex items-center justify-between w-full max-w-[1400px] mx-auto">
         <div className="flex items-center gap-2">
           <span 
             className="text-2xl md:text-3xl font-extrabold tracking-tighter text-black dark:text-white cursor-pointer select-none"
@@ -173,7 +173,7 @@ export default function Header() {
 
       {/* Date picker reel - only relevant/helpful in Daily or when transitioning to it */}
       {activeTab === "daily" && (
-        <div className="w-full max-w-5xl mx-auto flex items-center justify-center py-1 md:py-2">
+        <div className="w-full max-w-[1400px] mx-auto flex items-center justify-center py-1 md:py-2">
           <div className="relative w-full">
             <div
               ref={scrollContainerRef}

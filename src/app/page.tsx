@@ -129,7 +129,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-zinc-50/30 dark:bg-black text-black dark:text-zinc-100 pb-20 md:pb-6">
       <Header />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col justify-start">
+      <main className="flex-1 w-full max-w-[1400px] mx-auto flex flex-col justify-start">
         {renderActiveView()}
       </main>
 
