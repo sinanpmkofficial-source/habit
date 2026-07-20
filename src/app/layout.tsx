@@ -36,6 +36,8 @@ export const viewport = {
   interactiveWidget: "resizes-content",
 };
 
+import ClientLayout from "@/components/layout/ClientLayout";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -48,7 +50,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <PwaRegister />
-        {children}
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

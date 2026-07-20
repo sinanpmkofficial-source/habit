@@ -9,8 +9,12 @@ import ConfirmToggleBar, { PendingToggle } from "@/components/habits/ConfirmTogg
 
 const WEEKDAYS_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-export default function WeeklyView() {
-  const { habits, selectedDate, toggleHabitCompletion, setSelectedDate, setActiveTab } = useHabitStore();
+interface WeeklyViewProps {
+  onGoToDaily?: () => void;
+}
+
+export default function WeeklyView({ onGoToDaily }: WeeklyViewProps = {}) {
+  const { habits, selectedDate, toggleHabitCompletion, setSelectedDate } = useHabitStore();
   const { tasks } = useTaskStore();
   const [pendingToggle, setPendingToggle] = useState<PendingToggle | null>(null);
 
@@ -81,7 +85,9 @@ export default function WeeklyView() {
 
   const handleDayClick = (dateStr: string) => {
     setSelectedDate(dateStr);
-    setActiveTab("daily");
+    if (onGoToDaily) {
+      onGoToDaily();
+    }
   };
 
   const requestToggle = (habit: Habit, dateStr: string) => {

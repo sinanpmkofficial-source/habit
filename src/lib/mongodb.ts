@@ -49,6 +49,8 @@ export async function getDb(): Promise<Db> {
       db.collection("tasks").createIndex({ date: 1, completed: 1 }),
       // Habits: fast lookups by creation date (used to filter active habits per day)
       db.collection("habits").createIndex({ createdAt: 1 }),
+      // Prayers: fast lookups by date
+      db.collection("prayers").createIndex({ date: 1 }),
     ]);
     indexesEnsured = true;
   }

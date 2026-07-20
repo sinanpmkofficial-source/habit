@@ -13,7 +13,11 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-export default function MonthlyView() {
+interface MonthlyViewProps {
+  onGoToDaily?: () => void;
+}
+
+export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
   const { habits, toggleHabitCompletion } = useHabitStore();
   const { tasks } = useTaskStore();
   
