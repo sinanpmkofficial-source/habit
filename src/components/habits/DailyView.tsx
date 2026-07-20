@@ -4,7 +4,7 @@ import React from "react";
 import { useHabitStore } from "@/store/habit-store";
 import { useTaskStore } from "@/store/task-store";
 import { Habit, Task, calculateStreaks, getWeekdayIndex, isBeforeDate } from "@/lib/habit-utils";
-import { Flame, Check, PenLine, Plus, AlertCircle, ListTodo, SquareCheck } from "lucide-react";
+import { Flame, Check, PenLine, Plus, AlertCircle, ListTodo, SquareCheck, ChevronUp, ChevronDown } from "lucide-react";
 
 interface DailyViewProps {
   mode?: "habits-only" | "tasks-only" | "both";
@@ -22,7 +22,7 @@ export default function DailyView({
   onEditTask,
 }: DailyViewProps) {
   const { habits, selectedDate, toggleHabitCompletion } = useHabitStore();
-  const { tasks, toggleTaskCompletion } = useTaskStore();
+  const { tasks, toggleTaskCompletion, reorderTask } = useTaskStore();
 
   // Filter habits: must be created on or before the selected date
   const activeHabits = habits.filter((habit) => {
@@ -198,13 +198,13 @@ export default function DailyView({
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <button
                   onClick={() => toggleTaskCompletion(task._id!)}
-                  className={`btn-interactive flex items-center justify-center w-8 h-8 rounded-lg border transition-all cursor-pointer select-none ${
+                  className={`btn-interactive flex items-center justify-center w-6 h-6 rounded-lg border transition-all cursor-pointer select-none shrink-0 ${
                     task.completed
-                      ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black"
+                      ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-xs"
                       : "border-zinc-300 dark:border-zinc-700 bg-transparent text-transparent hover:border-black dark:hover:border-white"
                   }`}
                 >
-                  <SquareCheck className={`w-3.5 h-3.5 transition-transform duration-200 ${task.completed ? "scale-100" : "scale-0"}`} />
+                  <Check className={`w-3.5 h-3.5 stroke-[3] transition-transform duration-200 ${task.completed ? "scale-100" : "scale-0"}`} />
                 </button>
 
                 <span
@@ -217,12 +217,29 @@ export default function DailyView({
                 </span>
               </div>
 
-              <button
-                onClick={() => onEditTask(task)}
-                className="btn-interactive ml-2 p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white shrink-0"
-              >
-                <PenLine className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center gap-1 shrink-0 ml-2">
+                <button
+                  onClick={() => reorderTask(task._id!, "up")}
+                  className="btn-interactive p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
+                  title="Move task up"
+                >
+                  <ChevronUp className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => reorderTask(task._id!, "down")}
+                  className="btn-interactive p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
+                  title="Move task down"
+                >
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => onEditTask(task)}
+                  className="btn-interactive p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
+                  title="Edit task"
+                >
+                  <PenLine className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

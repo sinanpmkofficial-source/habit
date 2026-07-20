@@ -19,7 +19,7 @@ interface NavSheetProps {
 }
 
 const NAV_ITEMS = [
-  { href: "/habits",    label: "Habits",     icon: BookOpen,     enabled: true  },
+  { href: "/",          label: "Habits",     icon: BookOpen,     enabled: true  },
   { href: "/tasks",     label: "Tasks",      icon: CheckSquare2, enabled: true  },
   { href: "/prayers",   label: "Prayer",     icon: Moon,         enabled: true  },
   { href: "/braindump", label: "Brain Dump", icon: Brain,        enabled: true  },
@@ -66,7 +66,7 @@ export default function NavSheet({ isOpen, onClose }: NavSheetProps) {
           <div className="grid grid-cols-3 gap-2.5 px-4 pb-6">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
-              const isActive = item.href ? pathname === item.href : false;
+              const isActive = item.href === "/" ? (pathname === "/" || pathname === "/habits") : pathname === item.href;
 
               if (!item.enabled) {
                 return (

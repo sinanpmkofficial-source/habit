@@ -12,6 +12,8 @@ import {
   Sparkles,
   Lightbulb,
   X,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 
 type FilterMode = "all" | "active" | "completed";
@@ -23,8 +25,10 @@ export default function BrainDumpView() {
     updateIdea,
     toggleIdeaCompletion,
     deleteIdea,
+    reorderIdea,
   } = useBrainDumpStore();
 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [titleInput, setTitleInput] = useState("");
   const [contentInput, setContentInput] = useState("");
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
@@ -43,6 +47,7 @@ export default function BrainDumpView() {
 
     setTitleInput("");
     setContentInput("");
+    setIsAddModalOpen(false);
   };
 
   const handleOpenEdit = (idea: BrainIdea) => {
@@ -72,53 +77,27 @@ export default function BrainDumpView() {
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 px-4 md:px-6 py-6 md:py-8">
       {/* Header */}
-      <div className="flex flex-col">
-        <div className="flex items-center gap-2">
-          <Brain className="w-6 h-6 text-black dark:text-white" />
-          <h2 className="text-xl md:text-2xl font-extrabold tracking-tight text-black dark:text-white">
-            Brain Dump
-          </h2>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <Brain className="w-6 h-6 text-black dark:text-white" />
+            <h2 className="text-xl md:text-2xl font-extrabold tracking-tight text-black dark:text-white">
+              Brain Dump
+            </h2>
+          </div>
+          <p className="text-xs md:text-sm text-muted-text mt-1">
+            Capture thoughts, raw ideas, and unstructured notes instantly. No dates, no pressure.
+          </p>
         </div>
-        <p className="text-xs md:text-sm text-muted-text mt-1">
-          Capture thoughts, raw ideas, and unstructured notes instantly. No dates, no pressure.
-        </p>
+
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="btn-interactive flex items-center gap-1.5 px-4 py-2 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-extrabold shadow-sm whitespace-nowrap shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Dump Idea</span>
+        </button>
       </div>
-
-      {/* Input Box / Textarea Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-3 p-4 md:p-5 rounded-2xl border border-border bg-card-bg shadow-sm"
-      >
-        <input
-          type="text"
-          placeholder="Idea title (optional)..."
-          value={titleInput}
-          onChange={(e) => setTitleInput(e.target.value)}
-          className="w-full px-3.5 py-2 rounded-xl border border-border bg-muted-bg/50 text-sm font-semibold text-black dark:text-white placeholder:text-muted-text focus:outline-none focus:border-black dark:focus:border-white transition-all"
-        />
-
-        <textarea
-          rows={3}
-          placeholder="Dump your thought or idea here..."
-          value={contentInput}
-          onChange={(e) => setContentInput(e.target.value)}
-          className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted-bg/50 text-sm text-black dark:text-white placeholder:text-muted-text focus:outline-none focus:border-black dark:focus:border-white transition-all resize-none"
-        />
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
-          <span className="text-[11px] text-muted-text italic">
-            Timeless note • Add now, organize or complete later
-          </span>
-          <button
-            type="submit"
-            disabled={!titleInput.trim() && !contentInput.trim()}
-            className="btn-interactive flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-extrabold disabled:opacity-40 shadow-sm whitespace-nowrap shrink-0 w-full sm:w-auto"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Dump Idea</span>
-          </button>
-        </div>
-      </form>
 
       {/* Filter Pills */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-border pb-3">
@@ -158,8 +137,15 @@ export default function BrainDumpView() {
               : "No ideas dumped yet"}
           </h3>
           <p className="text-xs text-muted-text mt-1 max-w-[260px]">
-            Use the form above to quickly capture any thoughts or tasks floating in your head.
+            Click the button below to quickly capture any thoughts or tasks floating in your head.
           </p>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="btn-interactive mt-4 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-bold shadow-sm"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Dump New Idea</span>
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -227,6 +213,20 @@ export default function BrainDumpView() {
 
                   <div className="flex items-center gap-1">
                     <button
+                      onClick={() => reorderIdea(idea._id!, "up")}
+                      className="btn-interactive p-1.5 rounded-lg hover:bg-muted-bg text-muted-text hover:text-black dark:hover:text-white transition-colors"
+                      title="Move idea up"
+                    >
+                      <ChevronUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => reorderIdea(idea._id!, "down")}
+                      className="btn-interactive p-1.5 rounded-lg hover:bg-muted-bg text-muted-text hover:text-black dark:hover:text-white transition-colors"
+                      title="Move idea down"
+                    >
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </button>
+                    <button
                       onClick={() => handleOpenEdit(idea)}
                       className="btn-interactive p-1.5 rounded-lg hover:bg-muted-bg text-muted-text hover:text-black dark:hover:text-white transition-colors"
                       title="Edit idea"
@@ -246,6 +246,68 @@ export default function BrainDumpView() {
             );
           })}
         </div>
+      )}
+
+      {/* Add Idea Modal */}
+      {isAddModalOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-fade-in"
+            onClick={() => setIsAddModalOpen(false)}
+          />
+          <div className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto z-50 animate-slide-up">
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-4 p-5 rounded-3xl border border-border bg-white dark:bg-zinc-950 shadow-2xl"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-extrabold text-black dark:text-white">
+                  Dump New Idea
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="btn-interactive p-1 rounded-full text-muted-text hover:text-black dark:hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <input
+                type="text"
+                placeholder="Idea title (optional)..."
+                value={titleInput}
+                onChange={(e) => setTitleInput(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted-bg/50 text-sm font-semibold text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white transition-all"
+              />
+
+              <textarea
+                rows={4}
+                placeholder="Dump your thought or idea here..."
+                value={contentInput}
+                onChange={(e) => setContentInput(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted-bg/50 text-sm text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white transition-all resize-none"
+              />
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="btn-interactive px-4 py-2 rounded-xl border border-border text-xs font-bold text-muted-text"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!titleInput.trim() && !contentInput.trim()}
+                  className="btn-interactive px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-bold disabled:opacity-40"
+                >
+                  Dump Idea
+                </button>
+              </div>
+            </form>
+          </div>
+        </>
       )}
 
       {/* Edit Idea Modal */}

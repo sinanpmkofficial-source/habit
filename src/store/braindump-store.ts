@@ -19,6 +19,7 @@ interface BrainDumpState {
   updateIdea: (id: string, title: string, content?: string) => Promise<void>;
   toggleIdeaCompletion: (id: string) => Promise<void>;
   deleteIdea: (id: string) => Promise<void>;
+  reorderIdea: (id: string, direction: "up" | "down") => void;
 }
 
 const LOCAL_STORAGE_KEY = "habit_tracker_braindump";
@@ -176,5 +177,25 @@ export const useBrainDumpStore = create<BrainDumpState>((set, get) => ({
     } else {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(get().ideas));
     }
+  },
+
+  reorderIdea: (id, direction) => {
+    const { ideas } = get();
+    const index = ideas.findIndex((item) => item._id === id);
+    if (index === -1) return;
+
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= ideas.length) return;
+
+    const updated = [...ideas];
+    const temp = updated[index];
+    updated[index] = updated[newIndex];
+    updated[newIndex] = temp;
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+    }
+
+    set({ ideas: updated });
   },
 }));

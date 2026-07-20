@@ -38,7 +38,7 @@ export default function Header({ onMenuOpen }: HeaderProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const isFilterPage =
-    pathname === "/habits" || pathname === "/tasks" || pathname === "/prayers";
+    pathname === "/" || pathname === "/habits" || pathname === "/tasks" || pathname === "/prayers";
 
   // Show date reel only when in daily view mode on habits, tasks, or prayers pages
   const showDateReel = isFilterPage && viewMode === "daily";
@@ -71,7 +71,7 @@ export default function Header({ onMenuOpen }: HeaderProps) {
   }, [selectedDate, showDateReel]);
 
   const navItems = [
-    { href: "/habits", label: "Habits", icon: BookOpen },
+    { href: "/", label: "Habits", icon: BookOpen },
     { href: "/tasks", label: "Tasks", icon: CheckSquare2 },
     { href: "/prayers", label: "Prayer", icon: Moon },
     { href: "/braindump", label: "Brain Dump", icon: Brain },
@@ -85,7 +85,7 @@ export default function Header({ onMenuOpen }: HeaderProps) {
       <div className="flex items-center justify-between w-full max-w-[1400px] mx-auto">
         <div className="flex items-center gap-2">
           <Link
-            href="/habits"
+            href="/"
             onClick={() => setSelectedDate(getLocalDateString())}
             className="text-2xl md:text-3xl font-extrabold tracking-tighter text-black dark:text-white cursor-pointer select-none"
           >
@@ -115,7 +115,7 @@ export default function Header({ onMenuOpen }: HeaderProps) {
         <nav className="hidden md:flex items-center gap-1 xl:gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive = item.href === "/" ? (pathname === "/" || pathname === "/habits") : pathname === item.href;
             return (
               <Link
                 key={item.href}

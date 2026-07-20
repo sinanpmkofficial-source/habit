@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckSquare,
+  Check,
   Percent,
   Plus,
   PenLine,
@@ -230,14 +231,14 @@ export default function TaskMonthlyView({
                     <div className="flex items-center gap-2.5 flex-1 min-w-0">
                       <button
                         onClick={() => toggleTaskCompletion(task._id!)}
-                        className={`btn-interactive shrink-0 flex items-center justify-center w-5 h-5 rounded border transition-all ${
+                        className={`btn-interactive shrink-0 flex items-center justify-center w-5 h-5 rounded-md border transition-all cursor-pointer select-none ${
                           task.completed
-                            ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black"
-                            : "border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white"
+                            ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-xs"
+                            : "border-zinc-300 dark:border-zinc-700 bg-transparent text-transparent hover:border-black dark:hover:border-white"
                         }`}
                       >
-                        <SquareCheck
-                          className={`w-3 h-3 transition-transform ${
+                        <Check
+                          className={`w-3 h-3 stroke-[3] transition-transform duration-200 ${
                             task.completed ? "scale-100" : "scale-0"
                           }`}
                         />

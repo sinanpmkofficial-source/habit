@@ -12,6 +12,7 @@ interface TaskState {
   updateTask: (id: string, title: string, date: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   toggleTaskCompletion: (id: string) => Promise<void>;
+  reorderTask: (id: string, direction: "up" | "down") => void;
   clearAllTasks: () => Promise<void>;
 }
 
@@ -196,6 +197,26 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       const updated = get().tasks;
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
     }
+  },
+
+  reorderTask: (id, direction) => {
+    const { tasks } = get();
+    const index = tasks.findIndex((t) => t._id === id);
+    if (index === -1) return;
+
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= tasks.length) return;
+
+    const updated = [...tasks];
+    const temp = updated[index];
+    updated[index] = updated[newIndex];
+    updated[newIndex] = temp;
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+    }
+
+    set({ tasks: updated });
   },
 
   clearAllTasks: async () => {

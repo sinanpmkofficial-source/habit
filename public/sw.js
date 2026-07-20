@@ -1,4 +1,4 @@
-const CACHE_NAME = "habit-tracker-cache-v1";
+const CACHE_NAME = "reforge-cache-v2";
 const ASSETS_TO_CACHE = [
   "/",
   "/favicon.ico",
@@ -12,21 +12,21 @@ const ASSETS_TO_CACHE = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log("Service Worker: Caching files");
+      console.log("Service Worker: Caching assets");
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
-// Activate event: clean up old caches
+// Activate event: clean up old caches immediately
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log("Service Worker: Clearing Old Cache");
+            console.log("Service Worker: Clearing old cache", cache);
             return caches.delete(cache);
           }
         })
@@ -36,17 +36,41 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch event: serve from cache, update in background (Stale-While-Revalidate)
+// Fetch event: Network-first for navigation to avoid SW redirection errors, Stale-While-Revalidate for static assets
 self.addEventListener("fetch", (event) => {
-  // Only process standard GET requests, skip API routes (handled by localStorage store logic)
+  // Skip non-GET requests and API routes
   if (event.request.method !== "GET" || event.request.url.includes("/api/")) {
     return;
   }
 
+  // Navigation requests (page loads / PWA launch)
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // If response was redirected by server, fetch destination URL directly to prevent SW redirection error
+          if (response.redirected) {
+            return fetch(response.url);
+          }
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request).then((cached) => cached || caches.match("/"));
+        })
+    );
+    return;
+  }
+
+  // Static assets: Stale-While-Revalidate
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Fetch fresh version in background and update cache
         fetch(event.request)
           .then((networkResponse) => {
             if (networkResponse.status === 200) {
@@ -55,32 +79,21 @@ self.addEventListener("fetch", (event) => {
               });
             }
           })
-          .catch(() => {
-            // Ignore background fetch errors (e.g. offline)
-          });
+          .catch(() => {});
         return cachedResponse;
       }
 
-      // If not in cache, fetch from network
-      return fetch(event.request)
-        .then((response) => {
-          if (!response || response.status !== 200 || response.type !== "basic") {
-            return response;
-          }
-
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-
+      return fetch(event.request).then((response) => {
+        if (!response || response.status !== 200) {
           return response;
-        })
-        .catch(() => {
-          // If offline and request fails, default to caching root
-          if (event.request.mode === "navigate") {
-            return caches.match("/");
-          }
+        }
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
         });
+        return response;
+      });
     })
   );
 });
+
