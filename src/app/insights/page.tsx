@@ -15,4 +15,5 @@ export default function InsightsPage() {
   }, [fetchHabits, fetchTasks]);
 
   return <InsightsView />;
+
 }

@@ -174,7 +174,7 @@ export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
   }, [activeHabit, viewMonth, viewYear]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 px-4 py-6 md:py-8">
+    <div className="w-full flex flex-col gap-6 px-4 md:px-6 xl:px-10 py-6 md:py-8">
       {/* View Title */}
       <div className="flex flex-col">
         <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black dark:text-white">

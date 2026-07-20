@@ -51,6 +51,8 @@ export async function getDb(): Promise<Db> {
       db.collection("habits").createIndex({ createdAt: 1 }),
       // Prayers: fast lookups by date
       db.collection("prayers").createIndex({ date: 1 }),
+      // Brain dump: fast lookups by creation date
+      db.collection("braindump").createIndex({ createdAt: -1 }),
     ]);
     indexesEnsured = true;
   }

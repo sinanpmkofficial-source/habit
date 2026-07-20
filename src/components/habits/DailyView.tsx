@@ -48,7 +48,7 @@ export default function DailyView({
         <h2 className="text-xs font-bold uppercase tracking-widest text-muted-text">Habits</h2>
         <button
           onClick={onAddHabit}
-          className="btn-interactive shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-semibold hover:opacity-90 shadow-sm"
+          className="btn-interactive shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-semibold hover:opacity-90 shadow-sm"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>New Habit</span>
@@ -67,7 +67,7 @@ export default function DailyView({
           {habits.length === 0 && (
             <button
               onClick={onAddHabit}
-              className="btn-interactive mt-4 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-semibold"
+              className="btn-interactive mt-4 whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-semibold"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Create Habit</span>
@@ -163,7 +163,7 @@ export default function DailyView({
         </div>
         <button
           onClick={onAddTask}
-          className="btn-interactive shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-xs font-semibold text-black dark:text-white hover:border-black dark:hover:border-white hover:bg-muted-bg/50 transition-all"
+          className="btn-interactive shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-xs font-semibold text-black dark:text-white hover:border-black dark:hover:border-white hover:bg-muted-bg/50 transition-all"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>New Task</span>

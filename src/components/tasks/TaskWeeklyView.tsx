@@ -91,7 +91,7 @@ export default function TaskWeeklyView({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 px-4 md:px-6 xl:px-10 py-6 md:py-8">
+    <div className="w-full flex flex-col gap-6 px-4 md:px-6 xl:px-10 py-6 md:py-8">
       {/* Header & Overview */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -102,7 +102,7 @@ export default function TaskWeeklyView({
         </div>
 
         {/* Progress pill */}
-        <div className="flex items-center gap-3 px-4 py-2 rounded-2xl border border-border bg-card-bg w-fit">
+        <div className="flex items-center gap-3 px-4 py-2 rounded-2xl border border-border bg-card-bg w-fit whitespace-nowrap shrink-0">
           <div className="flex items-center gap-2">
             <CheckSquare className="w-4 h-4 text-black dark:text-white" />
             <span className="text-xs font-bold text-black dark:text-white">

@@ -15,12 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "habit. — Keep it simple.",
-  description: "A minimal, monochrome habit tracker designed for daily consistency.",
+  title: "reforge. — Keep it simple.",
+  description: "A minimal, monochrome habit and task tracker designed for daily consistency.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "habit.",
+    title: "reforge.",
   },
   formatDetection: {
     telephone: false,

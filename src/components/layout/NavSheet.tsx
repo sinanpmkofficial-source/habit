@@ -19,12 +19,12 @@ interface NavSheetProps {
 }
 
 const NAV_ITEMS = [
-  { href: "/habits",   label: "Habits",     icon: BookOpen,     enabled: true  },
-  { href: "/tasks",    label: "Tasks",      icon: CheckSquare2, enabled: true  },
-  { href: null,        label: "Prayer",     icon: Moon,         enabled: false },
-  { href: null,        label: "Brain Dump", icon: Brain,        enabled: false },
-  { href: "/insights", label: "Insights",   icon: TrendingUp,   enabled: true  },
-  { href: "/settings", label: "Settings",   icon: Settings,     enabled: true  },
+  { href: "/habits",    label: "Habits",     icon: BookOpen,     enabled: true  },
+  { href: "/tasks",     label: "Tasks",      icon: CheckSquare2, enabled: true  },
+  { href: "/prayers",   label: "Prayer",     icon: Moon,         enabled: true  },
+  { href: "/braindump", label: "Brain Dump", icon: Brain,        enabled: true  },
+  { href: "/insights",  label: "Insights",   icon: TrendingUp,   enabled: true  },
+  { href: "/settings",  label: "Settings",   icon: Settings,     enabled: true  },
 ];
 
 export default function NavSheet({ isOpen, onClose }: NavSheetProps) {

@@ -8,12 +8,11 @@ import DailyView from "@/components/habits/DailyView";
 import WeeklyView from "@/components/habits/WeeklyView";
 import MonthlyView from "@/components/habits/MonthlyView";
 import HabitModal from "@/components/habits/HabitModal";
-import ViewFilter, { ViewMode } from "@/components/layout/ViewFilter";
+import ViewFilter from "@/components/layout/ViewFilter";
 
 export default function HabitsPage() {
-  const { fetchHabits, isLoading } = useHabitStore();
+  const { fetchHabits, isLoading, viewMode, setViewMode } = useHabitStore();
   const { fetchTasks } = useTaskStore();
-  const [view, setView] = useState<ViewMode>("daily");
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
@@ -46,13 +45,13 @@ export default function HabitsPage() {
   return (
     <>
       <div className="flex flex-col gap-0">
-        {/* View filter */}
-        <div className="px-4 md:px-6 xl:px-10 pt-5 pb-1">
-          <ViewFilter value={view} onChange={setView} />
+        {/* Desktop View filter */}
+        <div className="hidden md:block px-4 md:px-6 xl:px-10 pt-5 pb-1">
+          <ViewFilter value={viewMode} onChange={setViewMode} />
         </div>
 
         {/* Content */}
-        {view === "daily" && (
+        {viewMode === "daily" && (
           <DailyView
             mode="habits-only"
             onAddHabit={handleAddHabit}
@@ -61,11 +60,11 @@ export default function HabitsPage() {
             onEditTask={() => {}}
           />
         )}
-        {view === "weekly" && (
-          <WeeklyView onGoToDaily={() => setView("daily")} />
+        {viewMode === "weekly" && (
+          <WeeklyView onGoToDaily={() => setViewMode("daily")} />
         )}
-        {view === "monthly" && (
-          <MonthlyView onGoToDaily={() => setView("daily")} />
+        {viewMode === "monthly" && (
+          <MonthlyView onGoToDaily={() => setViewMode("daily")} />
         )}
       </div>
 

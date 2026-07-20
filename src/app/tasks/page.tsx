@@ -3,17 +3,16 @@
 import React, { useState, useEffect } from "react";
 import { useHabitStore } from "@/store/habit-store";
 import { useTaskStore } from "@/store/task-store";
-import { Task, getLocalDateString } from "@/lib/habit-utils";
+import { Task } from "@/lib/habit-utils";
 import DailyView from "@/components/habits/DailyView";
 import TaskWeeklyView from "@/components/tasks/TaskWeeklyView";
 import TaskMonthlyView from "@/components/tasks/TaskMonthlyView";
 import TaskModal from "@/components/habits/TaskModal";
-import ViewFilter, { ViewMode } from "@/components/layout/ViewFilter";
+import ViewFilter from "@/components/layout/ViewFilter";
 
 export default function TasksPage() {
-  const { fetchHabits, selectedDate, setSelectedDate } = useHabitStore();
+  const { fetchHabits, selectedDate, viewMode, setViewMode } = useHabitStore();
   const { fetchTasks } = useTaskStore();
-  const [view, setView] = useState<ViewMode>("daily");
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [modalDefaultDate, setModalDefaultDate] = useState<string>(selectedDate);
@@ -43,12 +42,12 @@ export default function TasksPage() {
   return (
     <>
       <div className="flex flex-col gap-0">
-        {/* View filter */}
-        <div className="px-4 md:px-6 xl:px-10 pt-5 pb-1">
-          <ViewFilter value={view} onChange={setView} />
+        {/* Desktop View filter */}
+        <div className="hidden md:block px-4 md:px-6 xl:px-10 pt-5 pb-1">
+          <ViewFilter value={viewMode} onChange={setViewMode} />
         </div>
 
-        {view === "daily" && (
+        {viewMode === "daily" && (
           <DailyView
             mode="tasks-only"
             onAddHabit={() => {}}
@@ -58,15 +57,15 @@ export default function TasksPage() {
           />
         )}
 
-        {view === "weekly" && (
+        {viewMode === "weekly" && (
           <TaskWeeklyView
             onAddTaskForDate={(dateStr) => handleAddTask(dateStr)}
             onEditTask={handleEditTask}
-            onGoToDaily={() => setView("daily")}
+            onGoToDaily={() => setViewMode("daily")}
           />
         )}
 
-        {view === "monthly" && (
+        {viewMode === "monthly" && (
           <TaskMonthlyView
             onAddTaskForDate={(dateStr) => handleAddTask(dateStr)}
             onEditTask={handleEditTask}

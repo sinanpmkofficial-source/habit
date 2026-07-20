@@ -150,7 +150,7 @@ export default function TaskModal({
             <button
               type="button"
               onClick={onClose}
-              className="btn-interactive px-4 py-3 rounded-xl border border-border text-xs font-bold text-muted-text hover:text-black dark:hover:text-white"
+              className="btn-interactive px-4 py-3 rounded-xl border border-border text-xs font-bold text-muted-text hover:text-black dark:hover:text-white whitespace-nowrap shrink-0"
             >
               Cancel
             </button>
@@ -159,7 +159,7 @@ export default function TaskModal({
           <button
             type="button"
             onClick={() => handleSubmit()}
-            className="btn-interactive flex-1 px-5 py-3 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-bold text-center hover:opacity-90 shadow-sm"
+            className="btn-interactive flex-1 px-5 py-3 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-bold text-center hover:opacity-90 shadow-sm whitespace-nowrap shrink-0"
           >
             {task ? "Save Changes" : "Add Task"}
           </button>

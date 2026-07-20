@@ -8,6 +8,8 @@ import { getLocalDateString } from "@/lib/habit-utils";
 import {
   BookOpen,
   CheckSquare2,
+  Moon,
+  Brain,
   TrendingUp,
   Settings,
   Wifi,
@@ -15,6 +17,8 @@ import {
   RefreshCw,
   Menu,
 } from "lucide-react";
+
+import ViewFilter from "@/components/layout/ViewFilter";
 
 interface HeaderProps {
   onMenuOpen?: () => void;
@@ -25,14 +29,19 @@ export default function Header({ onMenuOpen }: HeaderProps) {
   const {
     selectedDate,
     setSelectedDate,
+    viewMode,
+    setViewMode,
     dbConnected,
     isSyncing,
   } = useHabitStore();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Show date reel on /habits and /tasks
-  const showDateReel = pathname === "/habits" || pathname === "/tasks";
+  const isFilterPage =
+    pathname === "/habits" || pathname === "/tasks" || pathname === "/prayers";
+
+  // Show date reel only when in daily view mode on habits, tasks, or prayers pages
+  const showDateReel = isFilterPage && viewMode === "daily";
 
   // Generate 365 days around today (182 before, 182 after)
   const dates = useMemo(() => {
@@ -64,6 +73,8 @@ export default function Header({ onMenuOpen }: HeaderProps) {
   const navItems = [
     { href: "/habits", label: "Habits", icon: BookOpen },
     { href: "/tasks", label: "Tasks", icon: CheckSquare2 },
+    { href: "/prayers", label: "Prayer", icon: Moon },
+    { href: "/braindump", label: "Brain Dump", icon: Brain },
     { href: "/insights", label: "Insights", icon: TrendingUp },
     { href: "/settings", label: "Settings", icon: Settings },
   ] as const;
@@ -78,9 +89,9 @@ export default function Header({ onMenuOpen }: HeaderProps) {
             onClick={() => setSelectedDate(getLocalDateString())}
             className="text-2xl md:text-3xl font-extrabold tracking-tighter text-black dark:text-white cursor-pointer select-none"
           >
-            habit.
+            reforge.
           </Link>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium border border-border bg-muted-bg text-muted-text">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium border border-border bg-muted-bg text-muted-text whitespace-nowrap shrink-0">
             {isSyncing ? (
               <>
                 <RefreshCw className="w-3 h-3 md:w-3.5 md:h-3.5 text-zinc-900 dark:text-white animate-spin" />
@@ -101,7 +112,7 @@ export default function Header({ onMenuOpen }: HeaderProps) {
         </div>
 
         {/* Desktop navigation links */}
-        <nav className="hidden md:flex items-center gap-1.5">
+        <nav className="hidden md:flex items-center gap-1 xl:gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -109,27 +120,25 @@ export default function Header({ onMenuOpen }: HeaderProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`btn-interactive flex items-center gap-2 px-5 py-2.5 rounded-full text-sm md:text-base font-semibold transition-colors ${
+                className={`btn-interactive flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs lg:text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${
                   isActive
                     ? "bg-black text-white dark:bg-white dark:text-black"
                     : "text-muted-text hover:bg-muted-bg hover:text-black dark:hover:text-white"
                 }`}
               >
-                <Icon className="w-4 h-4 md:w-4.5 md:h-4.5" />
+                <Icon className="w-4 h-4" />
                 <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Mobile Hamburger Menu Button */}
-        <button
-          onClick={onMenuOpen}
-          className="md:hidden p-2 rounded-xl border border-border bg-card-bg text-black dark:text-white hover:bg-muted-bg btn-interactive select-none"
-          aria-label="Open Navigation Menu"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
+        {/* Mobile top-right View Filter (replaces former hamburger button position) */}
+        {isFilterPage && (
+          <div className="md:hidden">
+            <ViewFilter value={viewMode} onChange={setViewMode} />
+          </div>
+        )}
       </div>
 
       {/* Date picker reel - only shown on /habits and /tasks */}
