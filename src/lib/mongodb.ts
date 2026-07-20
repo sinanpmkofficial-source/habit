@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, Db } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
 const options = {};
@@ -29,3 +29,29 @@ if (uri) {
 }
 
 export default clientPromise;
+
+let indexesEnsured = false;
+
+/**
+ * Returns the habit-tracker Db instance and ensures indexes exist.
+ * createIndex is idempotent — safe to call on every cold start.
+ */
+export async function getDb(): Promise<Db> {
+  if (!clientPromise) throw new Error("MongoDB not configured");
+  const mongoClient = await clientPromise;
+  const db = mongoClient.db("habit-tracker");
+
+  if (!indexesEnsured) {
+    await Promise.all([
+      // Tasks: fast lookups by date (used when filtering tasks for a selected day)
+      db.collection("tasks").createIndex({ date: 1 }),
+      // Tasks: fast lookups by completion status + date (useful for stats)
+      db.collection("tasks").createIndex({ date: 1, completed: 1 }),
+      // Habits: fast lookups by creation date (used to filter active habits per day)
+      db.collection("habits").createIndex({ createdAt: 1 }),
+    ]);
+    indexesEnsured = true;
+  }
+
+  return db;
+}

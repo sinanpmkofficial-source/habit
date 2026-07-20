@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/mongodb";
 
 export async function GET() {
   try {
-    if (!clientPromise) {
-      return NextResponse.json({ dbConnected: false, tasks: [] });
-    }
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
+    const db = await getDb();
     const tasks = await db.collection("tasks").find({}).toArray();
 
     const serializedTasks = tasks.map((task) => ({
@@ -31,12 +27,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    if (!clientPromise) {
-      return NextResponse.json(
-        { error: "Database not connected" },
-        { status: 503 }
-      );
-    }
+    const db = await getDb();
     const body = await request.json();
     const { title, date } = body;
 
@@ -52,9 +43,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
 
     const newTask = {
       title,
@@ -80,14 +68,7 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   try {
-    if (!clientPromise) {
-      return NextResponse.json(
-        { error: "Database not connected" },
-        { status: 503 }
-      );
-    }
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
+    const db = await getDb();
     await db.collection("tasks").deleteMany({});
     return NextResponse.json({ dbConnected: true, success: true });
   } catch (error: unknown) {

@@ -1,26 +1,16 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/mongodb";
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!clientPromise) {
-      return NextResponse.json({ error: "Database not connected" }, { status: 503 });
-    }
-
+    const db = await getDb();
     const { id } = await params;
     const body = await request.json();
-    const { date, completed } = body; // Expecting 'YYYY-MM-DD' and optional 'completed' boolean
-
-    if (!date) {
-      return NextResponse.json({ error: "Date is required" }, { status: 400 });
-    }
-
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
+    const { date, completed } = body;
 
     // Retrieve current habit to inspect completed dates
     const habit = await db.collection("habits").findOne({ _id: new ObjectId(id) });

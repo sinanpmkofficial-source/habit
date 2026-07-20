@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/mongodb";
 
 // PUT — update task title and/or date
 export async function PUT(
@@ -8,25 +8,14 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!clientPromise) {
-      return NextResponse.json(
-        { error: "Database not connected" },
-        { status: 503 }
-      );
-    }
+    const db = await getDb();
     const { id } = await params;
     const body = await request.json();
     const { title, date } = body;
 
     if (!title) {
-      return NextResponse.json(
-        { error: "Task title is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Task title is required" }, { status: 400 });
     }
-
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
 
     const result = await db.collection("tasks").findOneAndUpdate(
       { _id: new ObjectId(id) },
@@ -57,18 +46,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!clientPromise) {
-      return NextResponse.json(
-        { error: "Database not connected" },
-        { status: 503 }
-      );
-    }
+    const db = await getDb();
     const { id } = await params;
     const body = await request.json();
     const { completed } = body;
-
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
 
     const result = await db.collection("tasks").findOneAndUpdate(
       { _id: new ObjectId(id) },
@@ -99,16 +80,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!clientPromise) {
-      return NextResponse.json(
-        { error: "Database not connected" },
-        { status: 503 }
-      );
-    }
+    const db = await getDb();
     const { id } = await params;
-
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
 
     const result = await db
       .collection("tasks")

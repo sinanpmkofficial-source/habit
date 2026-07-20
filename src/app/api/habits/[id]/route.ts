@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/mongodb";
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!clientPromise) {
-      return NextResponse.json({ error: "Database not connected" }, { status: 503 });
-    }
-    
+    const db = await getDb();
     const { id } = await params;
     const body = await request.json();
     const { name, description, skipDays } = body;
@@ -18,9 +15,6 @@ export async function PUT(
     if (!name) {
       return NextResponse.json({ error: "Habit name is required" }, { status: 400 });
     }
-
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
 
     const updateFields = {
       name,
@@ -56,14 +50,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!clientPromise) {
-      return NextResponse.json({ error: "Database not connected" }, { status: 503 });
-    }
-    
+    const db = await getDb();
     const { id } = await params;
-
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
 
     const result = await db.collection("habits").deleteOne({
       _id: new ObjectId(id),

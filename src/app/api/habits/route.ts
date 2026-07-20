@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/mongodb";
 
 export async function GET() {
   try {
-    if (!clientPromise) {
-      return NextResponse.json({ dbConnected: false, habits: [] });
-    }
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
+    const db = await getDb();
     const habits = await db.collection("habits").find({}).toArray();
     
     // Map _id to string representation for standard JSON response
@@ -28,9 +24,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    if (!clientPromise) {
-      return NextResponse.json({ error: "Database not connected" }, { status: 503 });
-    }
+    const db = await getDb();
     const body = await request.json();
     const { name, description, skipDays, createdAt } = body;
 
@@ -38,8 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Habit name is required" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
+
 
     const newHabit = {
       name,
@@ -66,12 +59,7 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   try {
-    if (!clientPromise) {
-      return NextResponse.json({ error: "Database not connected" }, { status: 503 });
-    }
-    const client = await clientPromise;
-    const db = client.db("habit-tracker");
-    
+    const db = await getDb();
     await db.collection("habits").deleteMany({});
 
     return NextResponse.json({ dbConnected: true, success: true });
