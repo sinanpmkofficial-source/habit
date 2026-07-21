@@ -385,15 +385,15 @@ export default function HabitsInsights({ habits }: HabitsInsightsProps) {
             return (
               <div
                 key={habit._id}
-                className="flex flex-col p-5 rounded-2xl border border-border bg-card-bg shadow-sm gap-4 hover:border-orange-500/30 transition-all"
+                className="flex flex-col p-3.5 md:p-5 rounded-2xl border border-border bg-card-bg shadow-sm gap-3 md:gap-4 hover:border-orange-500/30 transition-all"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm md:text-base font-extrabold text-black dark:text-white truncate">
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-sm md:text-base font-extrabold text-black dark:text-white break-words whitespace-normal leading-snug">
                       {habit.name}
                     </span>
                     {habit.description && (
-                      <span className="text-[10px] md:text-xs text-muted-text truncate mt-0.5">
+                      <span className="text-[10px] md:text-xs text-muted-text break-words whitespace-normal leading-tight mt-0.5">
                         {habit.description}
                       </span>
                     )}
@@ -434,7 +434,7 @@ export default function HabitsInsights({ habits }: HabitsInsightsProps) {
 
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[9px] uppercase font-bold text-muted-text">Peak Day</span>
-                    <span className="text-xs font-black text-black dark:text-white truncate">
+                    <span className="text-xs font-black text-black dark:text-white break-words whitespace-normal">
                       {mostActiveDay}
                     </span>
                   </div>

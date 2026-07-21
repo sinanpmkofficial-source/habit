@@ -106,7 +106,7 @@ export default function WeeklyView({ onGoToDaily }: WeeklyViewProps = {}) {
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 px-4 md:px-6 xl:px-10 py-6 md:py-8">
+    <div className="w-full flex flex-col gap-4 md:gap-6 px-3 md:px-6 xl:px-10 py-3 md:py-6">
       {/* Header */}
       <div className="flex flex-col">
         <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black dark:text-white">
@@ -125,30 +125,30 @@ export default function WeeklyView({ onGoToDaily }: WeeklyViewProps = {}) {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2.5 md:gap-4">
           {habits.map((habit) => {
             const { currentStreak, longestStreak } = calculateStreaks(habit, todayStr);
 
             return (
               <div
                 key={habit._id}
-                className="flex flex-col md:flex-row md:items-center md:justify-between p-4 rounded-2xl border border-border bg-card-bg hover:border-zinc-400 dark:hover:border-zinc-700 transition-all gap-4"
+                className="flex flex-col md:flex-row md:items-center md:justify-between p-3 md:p-4 rounded-xl md:rounded-2xl border border-border bg-card-bg hover:border-zinc-400 dark:hover:border-zinc-700 transition-all gap-3 md:gap-4"
               >
                 {/* Info & Stats Section */}
                 <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-2 min-w-0 md:w-1/3">
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm md:text-base font-bold text-black dark:text-white truncate">
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-xs md:text-base font-bold text-black dark:text-white break-words whitespace-normal leading-snug">
                       {habit.name}
                     </span>
                     {habit.description && (
-                      <span className="text-[10px] md:text-xs text-muted-text truncate mt-0.5 max-w-[220px] md:max-w-xs">
+                      <span className="text-[10px] md:text-xs text-muted-text break-words whitespace-normal leading-tight mt-0.5">
                         {habit.description}
                       </span>
                     )}
                   </div>
 
                   {/* Streaks */}
-                  <div className="flex items-center gap-1.5 shrink-0 select-none md:mt-1.5">
+                  <div className="flex items-center gap-1.5 shrink-0 select-none md:mt-1.5 ml-2 md:ml-0">
                     {currentStreak > 0 && (
                       <div className="flex items-center gap-0.5 px-2 py-0.5 rounded-full border border-border bg-muted-bg text-[9px] md:text-xs font-bold text-black dark:text-white">
                         <Flame className="w-2.5 h-2.5 fill-black dark:fill-white text-black dark:text-white" />
@@ -162,7 +162,7 @@ export default function WeeklyView({ onGoToDaily }: WeeklyViewProps = {}) {
                 </div>
 
                 {/* 7 days horizontal reel */}
-                <div className="flex justify-between items-center bg-muted-bg/40 dark:bg-muted-bg/10 rounded-xl p-2 border border-border/50 md:flex-1 md:max-w-xl">
+                <div className="flex justify-between items-center bg-muted-bg/40 dark:bg-muted-bg/10 rounded-xl p-1.5 md:p-2 border border-border/50 md:flex-1 md:max-w-xl">
                   {weekDaysInfo.map((day) => {
                     const isCompleted = habit.completedDates.includes(day.dateStr);
                     const isSkipDay = habit.skipDays.includes(day.jsDayIndex);

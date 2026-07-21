@@ -174,7 +174,7 @@ export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
   }, [activeHabit, viewMonth, viewYear]);
 
   return (
-    <div className="w-full flex flex-col gap-6 px-4 md:px-6 xl:px-10 py-6 md:py-8">
+    <div className="w-full flex flex-col gap-4 md:gap-6 px-3 md:px-6 xl:px-10 py-3 md:py-6">
       {/* View Title */}
       <div className="flex flex-col">
         <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black dark:text-white">
@@ -183,7 +183,7 @@ export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
         <p className="text-xs md:text-sm text-muted-text mt-0.5">Visualize your habits calendar</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
         
         {/* Left Column: Selector, month navigator & stats cards */}
         <div className="flex flex-col gap-6">

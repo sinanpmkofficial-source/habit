@@ -91,7 +91,7 @@ export default function TaskWeeklyView({
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 px-4 md:px-6 xl:px-10 py-6 md:py-8">
+    <div className="w-full flex flex-col gap-4 md:gap-6 px-3 md:px-6 xl:px-10 py-3 md:py-6">
       {/* Header & Overview */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -116,14 +116,14 @@ export default function TaskWeeklyView({
       </div>
 
       {/* Grid of 7 days */}
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-2.5 md:gap-3">
         {weekDaysInfo.map((day) => {
           const isCurrentSelected = day.dateStr === selectedDate;
 
           return (
             <div
               key={day.dateStr}
-              className={`flex flex-col rounded-2xl border transition-all p-3.5 bg-card-bg ${
+              className={`flex flex-col rounded-xl md:rounded-2xl border transition-all p-2.5 md:p-3.5 bg-card-bg ${
                 isCurrentSelected
                   ? "border-black dark:border-white shadow-sm ring-1 ring-black/5 dark:ring-white/10"
                   : day.isToday
@@ -134,7 +134,7 @@ export default function TaskWeeklyView({
               {/* Day Header */}
               <div
                 onClick={() => handleSelectDay(day.dateStr)}
-                className="flex items-center justify-between cursor-pointer select-none pb-2 border-b border-border mb-2.5"
+                className="flex items-center justify-between cursor-pointer select-none pb-1.5 md:pb-2 border-b border-border mb-2"
               >
                 <div className="flex items-center gap-1.5">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-muted-text">
@@ -156,16 +156,16 @@ export default function TaskWeeklyView({
               </div>
 
               {/* Tasks List for Day */}
-              <div className="flex flex-col gap-2 flex-1 min-h-[80px]">
+              <div className="flex flex-col gap-1.5 md:gap-2 flex-1 min-h-[60px] md:min-h-[80px]">
                 {day.dayTasks.length === 0 ? (
-                  <div className="flex-1 flex flex-col items-center justify-center py-4 text-center">
+                  <div className="flex-1 flex flex-col items-center justify-center py-3 text-center">
                     <span className="text-[11px] text-muted-text italic">No tasks</span>
                   </div>
                 ) : (
                   day.dayTasks.map((task) => (
                     <div
                       key={task._id}
-                      className={`flex items-start justify-between p-2 rounded-xl border text-xs transition-all ${
+                      className={`flex items-start justify-between p-1.5 md:p-2 rounded-xl border text-xs transition-all ${
                         task.completed
                           ? "bg-muted-bg/40 border-border opacity-60"
                           : "bg-muted-bg/20 border-border hover:border-zinc-400 dark:hover:border-zinc-600"

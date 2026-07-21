@@ -75,7 +75,7 @@ export default function DailyView({
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-1.5 md:gap-2.5">
           {activeHabits.map((habit) => {
             const isCompleted = habit.completedDates.includes(selectedDate);
             const isSkipDay = habit.skipDays.includes(weekdayIndex);
@@ -84,16 +84,16 @@ export default function DailyView({
             return (
               <div
                 key={habit._id}
-                className={`flex items-center justify-between px-4 py-3.5 rounded-2xl border transition-all bg-card-bg ${
+                className={`flex items-center justify-between px-3.5 py-2 md:py-3 rounded-xl md:rounded-2xl border transition-all bg-card-bg ${
                   isCompleted
                     ? "border-black/20 dark:border-white/20 bg-neutral-50/50 dark:bg-zinc-900/10"
                     : "border-border hover:border-zinc-400 dark:hover:border-zinc-700"
                 }`}
               >
-                <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
                   <button
                     onClick={() => toggleHabitCompletion(habit._id!, selectedDate)}
-                    className={`btn-interactive flex items-center justify-center w-8 h-8 rounded-full border transition-all cursor-pointer select-none ${
+                    className={`btn-interactive flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-full border transition-all cursor-pointer select-none shrink-0 ${
                       isCompleted
                         ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black"
                         : isSkipDay
@@ -101,27 +101,27 @@ export default function DailyView({
                         : "border-zinc-300 dark:border-zinc-700 bg-transparent text-transparent hover:border-black dark:hover:border-white"
                     }`}
                   >
-                    <Check className={`w-4 h-4 stroke-[2.5] transition-transform duration-200 ${isCompleted ? "scale-100" : "scale-0"}`} />
+                    <Check className={`w-3.5 h-3.5 md:w-4 md:h-4 stroke-[2.5] transition-transform duration-200 ${isCompleted ? "scale-100" : "scale-0"}`} />
                   </button>
 
                   <div className="flex flex-col min-w-0 flex-1">
                     <span
                       onClick={() => toggleHabitCompletion(habit._id!, selectedDate)}
-                      className={`text-sm font-semibold cursor-pointer select-none truncate transition-all ${
+                      className={`text-xs md:text-sm font-semibold cursor-pointer break-words whitespace-normal leading-snug transition-all ${
                         isCompleted ? "line-through text-muted-text" : "text-black dark:text-white"
                       }`}
                     >
                       {habit.name}
                     </span>
                     {habit.description && (
-                      <span className="text-[11px] text-muted-text truncate">
+                      <span className="text-[10px] md:text-[11px] text-muted-text break-words whitespace-normal leading-tight mt-0.5">
                         {habit.description}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 ml-2">
+                <div className="flex items-center gap-1.5 md:gap-2 shrink-0 ml-2">
                   <div className="flex flex-col items-end gap-1 select-none">
                     {currentStreak > 0 && (
                       <div className="flex items-center gap-0.5 px-2 py-0.5 rounded-full border border-border bg-muted-bg text-[10px] md:text-xs font-bold text-black dark:text-white">
@@ -185,11 +185,11 @@ export default function DailyView({
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           {dayTasks.map((task) => (
             <div
               key={task._id}
-              className={`flex items-center justify-between px-4 py-3 rounded-2xl border transition-all bg-card-bg ${
+              className={`flex items-center justify-between px-3.5 py-1.5 md:py-2.5 rounded-xl md:rounded-2xl border transition-all bg-card-bg ${
                 task.completed
                   ? "border-black/20 dark:border-white/20 bg-neutral-50/50 dark:bg-zinc-900/10"
                   : "border-border hover:border-zinc-400 dark:hover:border-zinc-700"
@@ -198,7 +198,7 @@ export default function DailyView({
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <button
                   onClick={() => toggleTaskCompletion(task._id!)}
-                  className={`btn-interactive flex items-center justify-center w-6 h-6 rounded-lg border transition-all cursor-pointer select-none shrink-0 ${
+                  className={`btn-interactive flex items-center justify-center w-5 h-5 md:w-6 md:h-6 rounded-lg border transition-all cursor-pointer select-none shrink-0 ${
                     task.completed
                       ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-xs"
                       : "border-zinc-300 dark:border-zinc-700 bg-transparent text-transparent hover:border-black dark:hover:border-white"
@@ -209,7 +209,7 @@ export default function DailyView({
 
                 <span
                   onClick={() => toggleTaskCompletion(task._id!)}
-                  className={`text-sm font-semibold cursor-pointer select-none truncate transition-all ${
+                  className={`text-xs md:text-sm font-semibold cursor-pointer break-words whitespace-normal leading-snug transition-all ${
                     task.completed ? "line-through text-muted-text" : "text-black dark:text-white"
                   }`}
                 >
@@ -220,21 +220,21 @@ export default function DailyView({
               <div className="flex items-center gap-1 shrink-0 ml-2">
                 <button
                   onClick={() => reorderTask(task._id!, "up")}
-                  className="btn-interactive p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
+                  className="btn-interactive p-1 md:p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
                   title="Move task up"
                 >
                   <ChevronUp className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => reorderTask(task._id!, "down")}
-                  className="btn-interactive p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
+                  className="btn-interactive p-1 md:p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
                   title="Move task down"
                 >
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => onEditTask(task)}
-                  className="btn-interactive p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
+                  className="btn-interactive p-1 md:p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
                   title="Edit task"
                 >
                   <PenLine className="w-3.5 h-3.5" />
@@ -248,7 +248,7 @@ export default function DailyView({
   );
 
   return (
-    <div className="w-full flex flex-col gap-5 px-4 md:px-6 xl:px-10 py-6 md:py-8">
+    <div className="w-full flex flex-col gap-4 md:gap-5 px-3 md:px-6 xl:px-10 py-3 md:py-6">
       {/* Desktop overview strip — shown in both mode */}
       {mode === "both" && (
         <div className="hidden md:flex items-center gap-4 px-5 py-3 rounded-2xl border border-border bg-card-bg">

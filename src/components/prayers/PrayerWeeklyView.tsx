@@ -95,7 +95,7 @@ export default function PrayerWeeklyView() {
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 px-4 md:px-6 xl:px-10 py-6 md:py-8">
+    <div className="w-full flex flex-col gap-4 md:gap-6 px-3 md:px-6 xl:px-10 py-3 md:py-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -120,14 +120,14 @@ export default function PrayerWeeklyView() {
       </div>
 
       {/* Grid of 7 days */}
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-2.5 md:gap-3">
         {weekDaysInfo.map((day) => {
           const isSelected = day.dateStr === selectedDate;
 
           return (
             <div
               key={day.dateStr}
-              className={`flex flex-col rounded-2xl border transition-all p-3.5 bg-card-bg ${
+              className={`flex flex-col rounded-xl md:rounded-2xl border transition-all p-2.5 md:p-3.5 bg-card-bg ${
                 isSelected
                   ? "border-black dark:border-white shadow-sm ring-1 ring-black/5 dark:ring-white/10"
                   : day.isToday
@@ -138,7 +138,7 @@ export default function PrayerWeeklyView() {
               {/* Day Header */}
               <div
                 onClick={() => setSelectedDate(day.dateStr)}
-                className="flex items-center justify-between cursor-pointer select-none pb-2 border-b border-border mb-3"
+                className="flex items-center justify-between cursor-pointer select-none pb-1.5 md:pb-2 border-b border-border mb-2 md:mb-3"
               >
                 <div className="flex items-center gap-1.5">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-muted-text">
@@ -160,7 +160,7 @@ export default function PrayerWeeklyView() {
               </div>
 
               {/* 5 Prayers List */}
-              <div className="flex flex-col gap-2 flex-1">
+              <div className="flex flex-col gap-1.5 md:gap-2 flex-1">
                 {PRAYERS.map((prayer) => {
                   const isDone = day.dayCompletedList.includes(prayer.key);
 
@@ -175,7 +175,7 @@ export default function PrayerWeeklyView() {
                           isDone
                         )
                       }
-                      className={`btn-interactive flex items-center justify-between p-2 rounded-xl border text-xs transition-all cursor-pointer ${
+                      className={`btn-interactive flex items-center justify-between py-1.5 px-2 md:p-2 rounded-xl border text-xs transition-all cursor-pointer ${
                         isDone
                           ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black"
                           : "bg-muted-bg/30 border-border hover:border-zinc-400 dark:hover:border-zinc-700 text-black dark:text-white"

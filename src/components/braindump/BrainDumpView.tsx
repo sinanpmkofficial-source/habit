@@ -75,7 +75,7 @@ export default function BrainDumpView() {
   const completedCount = ideas.filter((i) => i.completed).length;
 
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 px-4 md:px-6 py-6 md:py-8">
+    <div className="w-full max-w-4xl mx-auto flex flex-col gap-4 md:gap-6 px-3 md:px-6 py-3 md:py-6">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col">
@@ -148,7 +148,7 @@ export default function BrainDumpView() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-4">
           {filteredIdeas.map((idea) => {
             const formattedDate = new Date(idea.createdAt).toLocaleDateString(
               "en-US",
@@ -158,7 +158,7 @@ export default function BrainDumpView() {
             return (
               <div
                 key={idea._id}
-                className={`flex flex-col justify-between p-4 rounded-2xl border transition-all bg-card-bg gap-3 ${
+                className={`flex flex-col justify-between p-3 md:p-4 rounded-xl md:rounded-2xl border transition-all bg-card-bg gap-2.5 md:gap-3 ${
                   idea.completed
                     ? "border-black/20 dark:border-white/20 opacity-60 bg-neutral-50/50 dark:bg-zinc-900/10"
                     : "border-border hover:border-zinc-400 dark:hover:border-zinc-700"

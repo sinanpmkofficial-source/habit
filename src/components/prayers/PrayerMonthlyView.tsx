@@ -140,7 +140,7 @@ export default function PrayerMonthlyView() {
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 px-4 md:px-6 xl:px-10 py-6 md:py-8">
+    <div className="w-full flex flex-col gap-4 md:gap-6 px-3 md:px-6 xl:px-10 py-3 md:py-6">
       {/* View Title */}
       <div className="flex flex-col">
         <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black dark:text-white">
@@ -151,9 +151,9 @@ export default function PrayerMonthlyView() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
         {/* Left Column: Month Navigator & Stats & Selected Day Panel */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 md:gap-6">
           {/* Month Selector */}
           <div className="flex items-center justify-between border border-border bg-card-bg rounded-xl px-2 py-1.5">
             <button
@@ -205,7 +205,7 @@ export default function PrayerMonthlyView() {
           </div>
 
           {/* Selected Day Prayers Inspection */}
-          <div className="flex flex-col p-4 rounded-2xl border border-border bg-card-bg gap-3">
+          <div className="flex flex-col p-3.5 md:p-4 rounded-2xl border border-border bg-card-bg gap-3">
             <div className="flex items-center justify-between pb-2 border-b border-border">
               <span className="text-xs font-bold text-black dark:text-white">
                 {selectedDate}
@@ -215,7 +215,7 @@ export default function PrayerMonthlyView() {
               </span>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5 md:gap-2">
               {PRAYERS.map((prayer) => {
                 const isDone = selectedDayCompletedList.includes(prayer.key);
 
@@ -230,7 +230,7 @@ export default function PrayerMonthlyView() {
                         isDone
                       )
                     }
-                    className={`btn-interactive flex items-center justify-between p-2.5 rounded-xl border text-xs transition-all cursor-pointer ${
+                    className={`btn-interactive flex items-center justify-between py-1.5 px-2.5 md:p-2.5 rounded-xl border text-xs transition-all cursor-pointer ${
                       isDone
                         ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black"
                         : "bg-muted-bg/30 border-border hover:border-zinc-400 dark:hover:border-zinc-700 text-black dark:text-white"

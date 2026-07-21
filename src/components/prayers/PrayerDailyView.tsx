@@ -23,9 +23,9 @@ export default function PrayerDailyView() {
   const progressPercent = Math.round((completedCount / PRAYERS.length) * 100);
 
   return (
-    <div className="w-full max-w-2xl mx-auto flex flex-col gap-6 px-4 md:px-6 py-6 md:py-8">
+    <div className="w-full max-w-2xl mx-auto flex flex-col gap-4 md:gap-6 px-3 md:px-6 py-3 md:py-6">
       {/* Daily Prayer Overview Card */}
-      <div className="flex items-center justify-between p-5 rounded-2xl border border-border bg-card-bg">
+      <div className="flex items-center justify-between p-3.5 md:p-5 rounded-2xl border border-border bg-card-bg">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <h2 className="text-lg md:text-xl font-extrabold text-black dark:text-white">
@@ -43,7 +43,7 @@ export default function PrayerDailyView() {
         </div>
 
         {/* Circular progress */}
-        <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
+        <div className="relative w-12 h-12 md:w-14 md:h-14 shrink-0 flex items-center justify-center">
           <svg className="w-full h-full transform -rotate-90">
             <circle
               cx="28"
@@ -72,7 +72,7 @@ export default function PrayerDailyView() {
       </div>
 
       {/* 5 Prayer Rows */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2 md:gap-3">
         {PRAYERS.map((prayer) => {
           const isCompleted = completedList.includes(prayer.key);
           const Icon = PRAYER_ICONS[prayer.key];
@@ -81,26 +81,26 @@ export default function PrayerDailyView() {
             <div
               key={prayer.key}
               onClick={() => togglePrayerCompletion(selectedDate, prayer.key)}
-              className={`btn-interactive flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer select-none ${
+              className={`btn-interactive flex items-center justify-between p-2.5 md:p-3.5 rounded-xl md:rounded-2xl border transition-all cursor-pointer select-none ${
                 isCompleted
                   ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-md"
                   : "bg-card-bg border-border hover:border-zinc-400 dark:hover:border-zinc-700 text-black dark:text-white"
               }`}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                  className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-colors shrink-0 ${
                     isCompleted
                       ? "bg-white/20 text-white dark:bg-black/20 dark:text-black"
                       : "bg-muted-bg text-black dark:text-white border border-border"
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4 md:w-5 md:h-5" />
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-base font-extrabold">
+                    <span className="text-sm md:text-base font-extrabold break-words whitespace-normal leading-snug">
                       {prayer.name}
                     </span>
                     <span
@@ -123,14 +123,14 @@ export default function PrayerDailyView() {
 
               {/* Checkbox button */}
               <div
-                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+                className={`w-7 h-7 md:w-8 md:h-8 rounded-full border flex items-center justify-center transition-all shrink-0 ml-2 ${
                   isCompleted
                     ? "bg-white text-black dark:bg-black dark:text-white border-white dark:border-black"
                     : "border-zinc-300 dark:border-zinc-700 bg-transparent"
                 }`}
               >
                 <Check
-                  className={`w-4 h-4 stroke-[3] transition-transform ${
+                  className={`w-3.5 h-3.5 md:w-4 md:h-4 stroke-[3] transition-transform ${
                     isCompleted ? "scale-100" : "scale-0"
                   }`}
                 />

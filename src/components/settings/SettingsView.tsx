@@ -92,7 +92,7 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 px-4 py-6 md:py-8">
+    <div className="w-full max-w-5xl mx-auto flex flex-col gap-4 md:gap-6 px-3 md:px-4 py-3 md:py-6">
       <div className="flex flex-col">
         <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black dark:text-white">
           Preferences & Data
@@ -113,7 +113,7 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
         
         {/* Left Column: Habits List Manager */}
         <div className="flex flex-col gap-3">
@@ -136,12 +136,12 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
           ) : (
             <div className="flex flex-col border border-border bg-card-bg rounded-2xl divide-y divide-border overflow-hidden">
               {habits.map((habit, index) => (
-                <div key={habit._id} className="flex items-center justify-between p-3.5 bg-card-bg hover:bg-neutral-50/50 dark:hover:bg-zinc-900/20 transition-all">
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-xs md:text-sm font-bold text-black dark:text-white truncate">
+                <div key={habit._id} className="flex items-center justify-between py-2 px-3 md:p-3.5 bg-card-bg hover:bg-neutral-50/50 dark:hover:bg-zinc-900/20 transition-all">
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-xs md:text-sm font-bold text-black dark:text-white break-words whitespace-normal leading-snug">
                       {habit.name}
                     </span>
-                    <span className="text-[9px] md:text-xs text-muted-text mt-0.5 truncate max-w-[200px] md:max-w-xs">
+                    <span className="text-[9px] md:text-xs text-muted-text mt-0.5 break-words whitespace-normal leading-tight">
                       Created on {habit.createdAt}
                     </span>
                   </div>
