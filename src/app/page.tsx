@@ -74,7 +74,6 @@ export default function Home() {
       case "daily":
         return (
           <DailyView
-            onAddHabit={handleAddHabitTrigger}
             onEditHabit={handleEditHabitTrigger}
           />
         );
@@ -92,7 +91,6 @@ export default function Home() {
       default:
         return (
           <DailyView
-            onAddHabit={handleAddHabitTrigger}
             onEditHabit={handleEditHabitTrigger}
           />
         );

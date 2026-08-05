@@ -3,14 +3,13 @@
 import React from "react";
 import { useHabitStore } from "@/store/habit-store";
 import { Habit, calculateStreaks, getWeekdayIndex, isBeforeDate, getLocalDateString } from "@/lib/habit-utils";
-import { Flame, Check, PenLine, Plus, AlertCircle } from "lucide-react";
+import { Flame, Check, PenLine, AlertCircle } from "lucide-react";
 
 interface DailyViewProps {
-  onAddHabit: () => void;
   onEditHabit: (habit: Habit) => void;
 }
 
-export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
+export default function DailyView({ onEditHabit }: DailyViewProps) {
   const { habits, selectedDate, setSelectedDate, toggleHabitCompletion } = useHabitStore();
 
   // Filter habits: must be created on or before the selected date
@@ -32,17 +31,6 @@ export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
         
         {/* Main Column: Header and Checklist */}
         <div className="md:col-span-2 flex flex-col gap-6">
-          {/* Header row with only New Habit Button */}
-          <div className="flex items-center justify-end">
-            {/* New Habit Button */}
-            <button
-              onClick={onAddHabit}
-              className="btn-interactive shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-semibold hover:opacity-90 shadow-sm"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>New Habit</span>
-            </button>
-          </div>
 
           {/* Habits List */}
           {activeHabits.length === 0 ? (
@@ -51,20 +39,12 @@ export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
               <h3 className="text-sm font-semibold text-black dark:text-white">No habits active</h3>
               <p className="text-xs text-muted-text mt-1 max-w-[240px]">
                 {habits.length === 0 
-                  ? "Start tracking your consistency by creating your first habit."
+                  ? "Manage and add your habits in Settings."
                   : "No habits were active on this date. Try switching to Today or check your settings."}
               </p>
-              {habits.length === 0 && (
-                <button
-                  onClick={onAddHabit}
-                  className="btn-interactive mt-4 px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-semibold shadow-sm"
-                >
-                  Get Started
-                </button>
-              )}
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5">
               {activeHabits.map((habit) => {
                 const isCompleted = habit.completedDates.includes(selectedDate);
                 const isSkipDay = habit.skipDays.includes(weekdayIndex);
@@ -76,19 +56,19 @@ export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
                 return (
                   <div
                     key={habit._id}
-                    className={`flex items-center justify-between p-4 rounded-2xl border transition-all bg-card-bg ${
+                    className={`flex items-center justify-between p-3 md:p-3.5 rounded-xl border transition-all bg-card-bg ${
                       isCompleted
                         ? "border-black dark:border-white/40 shadow-sm bg-neutral-50/50 dark:bg-zinc-900/10"
                         : "border-border hover:border-zinc-400 dark:hover:border-zinc-700"
                     }`}
                   >
                     {/* Habit details and completion checkbox */}
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                       {/* Tactical Checkbox */}
                       <button
                         disabled={!canToggle}
                         onClick={() => toggleHabitCompletion(habit._id!, selectedDate)}
-                        className={`btn-interactive flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full border transition-all ${
+                        className={`btn-interactive flex items-center justify-center w-6.5 h-6.5 md:w-7 md:h-7 rounded-full border transition-all ${
                           !canToggle
                             ? "opacity-40 cursor-not-allowed border-zinc-200 dark:border-zinc-800"
                             : "cursor-pointer select-none"
@@ -100,14 +80,14 @@ export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
                             : "border-zinc-300 dark:border-zinc-700 bg-transparent text-transparent hover:border-black dark:hover:border-white"
                         }`}
                       >
-                        <Check className={`w-4 h-4 md:w-4.5 md:h-4.5 transition-transform duration-200 ${isCompleted ? "scale-100" : "scale-0"}`} />
+                        <Check className={`w-3.5 h-3.5 md:w-3.5 md:h-3.5 transition-transform duration-200 ${isCompleted ? "scale-100" : "scale-0"}`} />
                       </button>
 
                       {/* Habit info */}
                       <div className="flex flex-col min-w-0">
                         <span
                           onClick={() => canToggle && toggleHabitCompletion(habit._id!, selectedDate)}
-                          className={`text-sm md:text-base font-semibold truncate ${
+                          className={`text-xs md:text-sm font-semibold truncate ${
                             canToggle ? "cursor-pointer select-none" : "cursor-default"
                           } ${
                             isCompleted ? "line-through text-muted-text" : "text-black dark:text-white"
@@ -116,7 +96,7 @@ export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
                           {habit.name}
                         </span>
                         {habit.description && (
-                          <span className="text-[11px] md:text-xs text-muted-text truncate mt-0.5 max-w-[200px] md:max-w-xs">
+                          <span className="text-[10px] md:text-[11px] text-muted-text truncate mt-0.5 max-w-[200px] md:max-w-xs">
                             {habit.description}
                           </span>
                         )}
@@ -124,17 +104,17 @@ export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
                     </div>
 
                     {/* Right actions: streaks & edit */}
-                    <div className="flex items-center gap-3 ml-2 shrink-0">
+                    <div className="flex items-center gap-2.5 ml-2 shrink-0">
                       {/* Streak & Skip indicators */}
-                      <div className="flex flex-col items-end gap-1 select-none">
+                      <div className="flex flex-col items-end gap-0.5 select-none">
                         {currentStreak > 0 && (
-                          <div className="flex items-center gap-0.5 px-2 py-0.5 rounded-full border border-border bg-muted-bg text-[10px] md:text-xs font-bold text-black dark:text-white">
-                            <Flame className="w-3 h-3 text-black dark:text-white fill-black dark:fill-white" />
+                          <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full border border-border bg-muted-bg text-[9px] md:text-[10px] font-bold text-black dark:text-white">
+                            <Flame className="w-2.5 h-2.5 text-black dark:text-white fill-black dark:fill-white" />
                             <span>{currentStreak}d</span>
                           </div>
                         )}
                         {isSkipDay && !isCompleted && (
-                          <span className="text-[9px] md:text-[10px] font-semibold tracking-wide uppercase px-1.5 py-0.5 rounded border border-dashed border-zinc-300 dark:border-zinc-800 text-muted-text">
+                          <span className="text-[8px] md:text-[9px] font-semibold tracking-wide uppercase px-1 py-0.5 rounded border border-dashed border-zinc-300 dark:border-zinc-800 text-muted-text">
                             Skip Day
                           </span>
                         )}
@@ -143,9 +123,9 @@ export default function DailyView({ onAddHabit, onEditHabit }: DailyViewProps) {
                       {/* Edit Button */}
                       <button
                         onClick={() => onEditHabit(habit)}
-                        className="btn-interactive p-1.5 rounded-lg border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
+                        className="btn-interactive p-1 rounded-md border border-border hover:border-black dark:hover:border-white text-muted-text hover:text-black dark:hover:text-white"
                       >
-                        <PenLine className="w-3.5 h-3.5" />
+                        <PenLine className="w-3 h-3" />
                       </button>
                     </div>
                   </div>
