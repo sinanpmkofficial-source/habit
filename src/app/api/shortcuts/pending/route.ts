@@ -7,9 +7,6 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const format = searchParams.get("format");
     const dateParam = searchParams.get("date");
-    const incomingToken = searchParams.get("token") || 
-      searchParams.get("apiKey") || 
-      request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
 
     const today = dateParam || getLocalDateString();
     const weekdayIndex = getWeekdayIndex(today);
@@ -24,19 +21,6 @@ export async function GET(request: Request) {
 
     const client = await clientPromise;
     const db = client.db("habit-tracker");
-
-    // Token Authentication Check
-    const tokenDoc = await db.collection("settings").findOne({ _id: "api_token" as any });
-    if (tokenDoc && tokenDoc.token) {
-      if (!incomingToken || incomingToken !== tokenDoc.token) {
-        const authErrorMsg = "Unauthorized: Invalid or missing API token.";
-        if (format === "text") {
-          return new Response(authErrorMsg, { status: 401, headers: { "Content-Type": "text/plain; charset=utf-8" } });
-        }
-        return NextResponse.json({ success: false, error: authErrorMsg }, { status: 401 });
-      }
-    }
-
     const habits = await db.collection("habits").find({}).toArray();
 
     // Active habits for the target date
