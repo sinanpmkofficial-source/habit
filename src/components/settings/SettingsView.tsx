@@ -29,6 +29,7 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
   const [isGenerating, setIsGenerating] = useState(false);
   const [showToken, setShowToken] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
 
   // Fetch token status on mount
   useEffect(() => {
@@ -313,9 +314,23 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
                   </div>
 
                   {/* Shortcuts Sample URL */}
-                  <div className="flex flex-col p-2.5 rounded-xl border border-border bg-muted-bg/50 gap-1 text-[11px]">
-                    <span className="font-bold text-black dark:text-white">iOS Shortcuts URL:</span>
-                    <code className="text-[10px] font-mono text-muted-text break-all select-all">
+                  <div className="flex flex-col p-3 rounded-xl border border-border bg-muted-bg/50 gap-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-black dark:text-white">iOS Shortcuts URL:</span>
+                      <button
+                        onClick={() => {
+                          const fullUrl = `${baseUrl}/api/shortcuts/pending?token=${tokenInfo.token}&format=text`;
+                          navigator.clipboard.writeText(fullUrl);
+                          setCopiedUrl(true);
+                          setTimeout(() => setCopiedUrl(false), 2000);
+                        }}
+                        className="btn-interactive flex items-center gap-1 text-[11px] font-semibold text-black dark:text-white hover:underline cursor-pointer"
+                      >
+                        {copiedUrl ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedUrl ? "Copied URL!" : "Copy Full URL"}</span>
+                      </button>
+                    </div>
+                    <code className="text-[10px] font-mono text-muted-text break-all p-2 rounded-lg bg-card-bg border border-border select-all">
                       {`${baseUrl}/api/shortcuts/pending?token=${tokenInfo.token}&format=text`}
                     </code>
                   </div>
