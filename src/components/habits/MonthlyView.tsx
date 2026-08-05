@@ -2,10 +2,8 @@
 
 import React, { useState, useMemo } from "react";
 import { useHabitStore } from "@/store/habit-store";
-import { useTaskStore } from "@/store/task-store";
 import { Habit, calculateStreaks, getWeekdayIndex, isBeforeDate, getLocalDateString, addDays } from "@/lib/habit-utils";
-import { ChevronLeft, ChevronRight, BarChart2, Flame, Percent, CheckCircle, Calendar as CalendarIcon, CheckSquare } from "lucide-react";
-import ConfirmToggleBar, { PendingToggle } from "@/components/habits/ConfirmToggleBar";
+import { ChevronLeft, ChevronRight, BarChart2, Flame, Percent, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
 
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
 const MONTHS = [
@@ -13,13 +11,8 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-interface MonthlyViewProps {
-  onGoToDaily?: () => void;
-}
-
-export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
+export default function MonthlyView() {
   const { habits, toggleHabitCompletion } = useHabitStore();
-  const { tasks } = useTaskStore();
   
   // Local state for the navigated calendar month & year (defaulting to current date)
   const today = useMemo(() => new Date(), []);
@@ -28,23 +21,6 @@ export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
   
   // Local state for selected habit ID (default to first habit if available)
   const [selectedHabitId, setSelectedHabitId] = useState<string>("");
-  const [pendingToggle, setPendingToggle] = useState<PendingToggle | null>(null);
-
-  const requestToggle = (dateStr: string) => {
-    if (!activeHabit) return;
-    setPendingToggle({
-      habitId: activeHabit._id!,
-      dateStr,
-      habitName: activeHabit.name,
-      isCurrentlyCompleted: activeHabit.completedDates.includes(dateStr),
-    });
-  };
-
-  const handleConfirmToggle = () => {
-    if (!pendingToggle) return;
-    toggleHabitCompletion(pendingToggle.habitId, pendingToggle.dateStr);
-    setPendingToggle(null);
-  };
 
   // Sync selectedHabitId with habits list if empty or invalid
   const activeHabit = useMemo(() => {
@@ -114,8 +90,6 @@ export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
         isToday,
         isFuture,
         jsDayIndex,
-        taskTotal: tasks.filter((t) => t.date === dateStr).length,
-        taskDone: tasks.filter((t) => t.date === dateStr && t.completed).length,
       });
     }
     
@@ -174,7 +148,7 @@ export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
   }, [activeHabit, viewMonth, viewYear]);
 
   return (
-    <div className="w-full flex flex-col gap-4 md:gap-6 px-3 md:px-6 xl:px-10 py-3 md:py-6">
+    <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 px-4 py-6 md:py-8">
       {/* View Title */}
       <div className="flex flex-col">
         <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black dark:text-white">
@@ -183,7 +157,7 @@ export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
         <p className="text-xs md:text-sm text-muted-text mt-0.5">Visualize your habits calendar</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         
         {/* Left Column: Selector, month navigator & stats cards */}
         <div className="flex flex-col gap-6">
@@ -318,10 +292,10 @@ export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
                   const canToggle = !cell.isFuture && !isInactive;
 
                   return (
-                    <div key={cell.dateStr} className="aspect-square flex flex-col items-center justify-center gap-0.5">
+                    <div key={cell.dateStr} className="aspect-square flex items-center justify-center">
                       <button
                         disabled={!canToggle}
-                        onClick={() => requestToggle(cell.dateStr)}
+                        onClick={() => toggleHabitCompletion(activeHabit._id!, cell.dateStr)}
                         className={`btn-interactive w-full max-w-[44px] md:max-w-[48px] aspect-square rounded-full flex flex-col items-center justify-center text-xs md:text-sm font-bold border relative ${
                           isCompleted
                             ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-sm"
@@ -345,28 +319,6 @@ export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
                           />
                         )}
                       </button>
-
-                      {/* Task indicator dots below the habit circle */}
-                      {cell.taskTotal > 0 && (
-                        <div className="flex items-center justify-center gap-0.5 h-2">
-                          {cell.taskDone === cell.taskTotal ? (
-                            // All tasks done — solid filled indicator
-                            <div className="w-1.5 h-1.5 rounded-full bg-black dark:bg-white" />
-                          ) : (
-                            // Partial — show up to 3 hollow dots, filled for done
-                            Array.from({ length: Math.min(cell.taskTotal, 3) }).map((_, i) => (
-                              <div
-                                key={i}
-                                className={`w-1 h-1 rounded-full border ${
-                                  i < cell.taskDone
-                                    ? "bg-black dark:bg-white border-black dark:border-white"
-                                    : "border-zinc-400 dark:border-zinc-600 bg-transparent"
-                                }`}
-                              />
-                            ))
-                          )}
-                        </div>
-                      )}
                     </div>
                   );
                 })}
@@ -376,13 +328,6 @@ export default function MonthlyView({ onGoToDaily }: MonthlyViewProps = {}) {
         </div>
 
       </div>
-
-      {/* Confirmation bar */}
-      <ConfirmToggleBar
-        pending={pendingToggle}
-        onConfirm={handleConfirmToggle}
-        onCancel={() => setPendingToggle(null)}
-      />
     </div>
   );
 }

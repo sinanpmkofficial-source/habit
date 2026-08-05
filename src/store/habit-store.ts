@@ -7,8 +7,7 @@ interface HabitState {
   isSyncing: boolean;
   dbConnected: boolean;
   selectedDate: string;
-  viewMode: "daily" | "weekly" | "monthly";
-  activeTab: "daily" | "weekly" | "monthly" | "settings" | "insights";
+  activeTab: "daily" | "weekly" | "monthly" | "settings";
   
   // Actions
   fetchHabits: () => Promise<void>;
@@ -17,8 +16,7 @@ interface HabitState {
   deleteHabit: (id: string) => Promise<void>;
   toggleHabitCompletion: (id: string, date: string) => Promise<void>;
   setSelectedDate: (date: string) => void;
-  setViewMode: (mode: "daily" | "weekly" | "monthly") => void;
-  setActiveTab: (tab: "daily" | "weekly" | "monthly" | "settings" | "insights") => void;
+  setActiveTab: (tab: "daily" | "weekly" | "monthly" | "settings") => void;
   reorderHabit: (id: string, direction: "up" | "down") => void;
   
   // Storage actions
@@ -76,10 +74,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   isSyncing: false,
   dbConnected: false,
   selectedDate: getLocalDateString(),
-  viewMode: "daily",
   activeTab: "daily",
-
-  setViewMode: (mode) => set({ viewMode: mode }),
 
   fetchHabits: async () => {
     // 1. Instantly load from localStorage if available

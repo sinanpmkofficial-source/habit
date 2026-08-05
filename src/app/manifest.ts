@@ -2,8 +2,8 @@ import { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "reforge. — Keep it simple.",
-    short_name: "reforge.",
+    name: "habit. — Keep it simple.",
+    short_name: "habit.",
     description: "A minimal, monochrome habit tracker designed for daily consistency.",
     start_url: "/",
     display: "standalone",

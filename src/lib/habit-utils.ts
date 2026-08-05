@@ -7,14 +7,6 @@ export interface Habit {
   completedDates: string[]; // YYYY-MM-DD
 }
 
-export interface Task {
-  _id?: string;
-  title: string;
-  date: string;      // YYYY-MM-DD — the day this task belongs to
-  completed: boolean;
-  createdAt: string; // YYYY-MM-DD
-}
-
 /**
  * Returns a YYYY-MM-DD string representing the local date.
  */

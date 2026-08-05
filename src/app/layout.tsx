@@ -15,12 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "reforge. — Keep it simple.",
-  description: "A minimal, monochrome habit and task tracker designed for daily consistency.",
+  title: "habit. — Keep it simple.",
+  description: "A minimal, monochrome habit tracker designed for daily consistency.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "reforge.",
+    title: "habit.",
   },
   formatDetection: {
     telephone: false,
@@ -33,10 +33,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  interactiveWidget: "resizes-content",
 };
-
-import ClientLayout from "@/components/layout/ClientLayout";
 
 export default function RootLayout({
   children,
@@ -50,7 +47,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <PwaRegister />
-        <ClientLayout>{children}</ClientLayout>
+        {children}
       </body>
     </html>
   );
