@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useHabitStore } from "@/store/habit-store";
 import { Habit } from "@/lib/habit-utils";
-import { Download, Upload, Trash2, PenLine, AlertTriangle, ArrowUp, ArrowDown } from "lucide-react";
+import { Download, Upload, Trash2, PenLine, AlertTriangle, ArrowUp, ArrowDown, Key, Copy, Check, Eye, EyeOff, RefreshCw, ShieldCheck } from "lucide-react";
 
 interface SettingsViewProps {
   onEditHabit: (habit: Habit) => void;
@@ -22,6 +22,62 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [importStatus, setImportStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  // API Token state
+  const [tokenInfo, setTokenInfo] = useState<{ hasToken: boolean; token: string | null; createdAt?: string } | null>(null);
+  const [isTokenLoading, setIsTokenLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // Fetch token status on mount
+  useEffect(() => {
+    fetch("/api/settings/token")
+      .then((res) => res.json())
+      .then((data) => {
+        setTokenInfo(data);
+        setIsTokenLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load API token status:", err);
+        setIsTokenLoading(false);
+      });
+  }, []);
+
+  const handleGenerateToken = async () => {
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/settings/token", { method: "POST" });
+      const data = await res.json();
+      setTokenInfo(data);
+      setShowToken(true);
+    } catch (e) {
+      console.error("Failed to generate API token:", e);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleRevokeToken = async () => {
+    if (!confirm("Are you sure you want to revoke your API token? iOS Shortcuts using this token will stop working until updated.")) return;
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/settings/token", { method: "DELETE" });
+      const data = await res.json();
+      setTokenInfo(data);
+      setShowToken(false);
+    } catch (e) {
+      console.error("Failed to revoke API token:", e);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopyToken = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Trigger JSON Export
   const handleExport = () => {
@@ -90,6 +146,8 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
     setImportStatus({ type: "success", message: "All data cleared successfully." });
     setTimeout(() => setImportStatus(null), 3000);
   };
+
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://your-domain.com";
 
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 px-4 py-6 md:py-8">
@@ -190,8 +248,100 @@ export default function SettingsView({ onEditHabit, onAddHabit }: SettingsViewPr
           )}
         </div>
 
-        {/* Right Column: backup options */}
+        {/* Right Column: API Token & Backup Options */}
         <div className="flex flex-col gap-6">
+
+          {/* API Token / iOS Integration Card */}
+          <div className="flex flex-col gap-3">
+            <span className="text-[10px] md:text-xs uppercase font-bold tracking-wider text-muted-text flex items-center gap-1.5">
+              <Key className="w-3.5 h-3.5" />
+              API Token & iOS Shortcuts
+            </span>
+
+            <div className="flex flex-col p-4 rounded-2xl border border-border bg-card-bg gap-3">
+              <p className="text-xs text-muted-text leading-relaxed">
+                Use your API token to authenticate requests from iOS Shortcuts or external automations.
+              </p>
+
+              {isTokenLoading ? (
+                <div className="h-10 bg-muted-bg rounded-xl animate-pulse" />
+              ) : tokenInfo?.hasToken && tokenInfo.token ? (
+                <div className="flex flex-col gap-2.5">
+                  {/* Token Display Row */}
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type={showToken ? "text" : "password"}
+                        readOnly
+                        value={tokenInfo.token}
+                        className="w-full text-xs font-mono px-3 py-2 rounded-xl border border-border bg-muted-bg text-black dark:text-white pr-9"
+                      />
+                      <button
+                        onClick={() => setShowToken(!showToken)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-text hover:text-black dark:hover:text-white"
+                        title={showToken ? "Hide Token" : "Show Token"}
+                      >
+                        {showToken ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => handleCopyToken(tokenInfo.token!)}
+                      className="btn-interactive flex items-center gap-1.5 px-3 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-semibold shadow-sm shrink-0"
+                    >
+                      {copied ? <Check className="w-3.5 h-3.5 text-green-400 dark:text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copied ? "Copied" : "Copy"}</span>
+                    </button>
+                  </div>
+
+                  {/* Actions & Instructions */}
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <button
+                      disabled={isGenerating}
+                      onClick={handleGenerateToken}
+                      className="text-muted-text hover:text-black dark:hover:text-white underline font-medium cursor-pointer"
+                    >
+                      Regenerate
+                    </button>
+                    <button
+                      disabled={isGenerating}
+                      onClick={handleRevokeToken}
+                      className="text-red-500 hover:text-red-700 underline font-medium cursor-pointer"
+                    >
+                      Revoke Token
+                    </button>
+                  </div>
+
+                  {/* Shortcuts Sample URL */}
+                  <div className="flex flex-col p-2.5 rounded-xl border border-border bg-muted-bg/50 gap-1 text-[11px]">
+                    <span className="font-bold text-black dark:text-white">iOS Shortcuts URL:</span>
+                    <code className="text-[10px] font-mono text-muted-text break-all select-all">
+                      {`${baseUrl}/api/shortcuts/pending?token=${tokenInfo.token}&format=text`}
+                    </code>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-start gap-3">
+                  <p className="text-xs text-muted-text">
+                    No active API token found. Generate one to secure your iOS Shortcuts endpoint.
+                  </p>
+                  <button
+                    disabled={isGenerating}
+                    onClick={handleGenerateToken}
+                    className="btn-interactive flex items-center gap-2 px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-semibold shadow-sm"
+                  >
+                    {isGenerating ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Key className="w-3.5 h-3.5" />
+                    )}
+                    <span>Generate API Token</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Data Operations */}
           <div className="flex flex-col gap-3">
             <span className="text-[10px] md:text-xs uppercase font-bold tracking-wider text-muted-text">
