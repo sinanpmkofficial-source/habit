@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { useHabitStore } from "@/store/habit-store";
-import { Habit, calculateStreaks, getWeekdayIndex, isBeforeDate, getLocalDateString, addDays } from "@/lib/habit-utils";
+import { Habit, calculateStreaks, isFixedSkipDay, isBeforeDate, getLocalDateString, addDays } from "@/lib/habit-utils";
 import { Flame, Check, HelpCircle } from "lucide-react";
 
 const WEEKDAYS_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -124,6 +124,11 @@ export default function WeeklyView() {
                     <span className="text-[9px] md:text-xs font-medium text-muted-text border border-border px-1.5 py-0.5 rounded-full bg-muted-bg">
                       Best: {longestStreak}d
                     </span>
+                    {habit.skipMode === "flexible" && (
+                      <span className="text-[9px] md:text-xs font-medium text-muted-text border border-dashed border-border px-1.5 py-0.5 rounded-full bg-muted-bg">
+                        Flex 1/wk
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -131,8 +136,8 @@ export default function WeeklyView() {
                 <div className="flex justify-between items-center bg-muted-bg/40 dark:bg-muted-bg/10 rounded-xl p-2 border border-border/50 md:flex-1 md:max-w-xl">
                   {weekDaysInfo.map((day) => {
                     const isCompleted = habit.completedDates.includes(day.dateStr);
-                    const isSkipDay = habit.skipDays.includes(day.jsDayIndex);
-                    
+                    const isSkipDay = isFixedSkipDay(habit, day.dateStr);
+
                     // A habit is inactive if the check date is before its creation date
                     const isInactive = isBeforeDate(day.dateStr, habit.createdAt);
                     const canToggle = !day.isFuture && !isInactive;

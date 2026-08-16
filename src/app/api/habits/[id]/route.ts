@@ -13,7 +13,7 @@ export async function PUT(
     
     const { id } = await params;
     const body = await request.json();
-    const { name, description, skipDays } = body;
+    const { name, description, skipDays, skipMode } = body;
 
     if (!name) {
       return NextResponse.json({ error: "Habit name is required" }, { status: 400 });
@@ -22,10 +22,13 @@ export async function PUT(
     const client = await clientPromise;
     const db = client.db("habit-tracker");
 
+    const resolvedSkipMode = skipMode === "flexible" ? "flexible" : "fixed";
+
     const updateFields = {
       name,
       description: description || "",
-      skipDays: Array.isArray(skipDays) ? skipDays : [],
+      skipDays: resolvedSkipMode === "flexible" ? [] : Array.isArray(skipDays) ? skipDays : [],
+      skipMode: resolvedSkipMode,
     };
 
     const result = await db.collection("habits").findOneAndUpdate(

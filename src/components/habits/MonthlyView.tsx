@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useHabitStore } from "@/store/habit-store";
-import { Habit, calculateStreaks, getWeekdayIndex, isBeforeDate, getLocalDateString, addDays } from "@/lib/habit-utils";
+import { Habit, calculateStreaks, isFixedSkipDay, getWeekStart, isBeforeDate, getLocalDateString, addDays } from "@/lib/habit-utils";
 import { ChevronLeft, ChevronRight, BarChart2, Flame, Percent, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
 
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
@@ -113,26 +113,37 @@ export default function MonthlyView() {
     
     // 3. Completion rate for this month (active days in this month)
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const isFlexible = activeHabit.skipMode === "flexible";
+    const flexUsage = new Map<string, number>();
     let activeDaysCount = 0;
     let completionsCount = 0;
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
       const dayStr = String(day).padStart(2, "0");
       const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${dayStr}`;
-      
+
       // Don't count days in future or before habit creation
       if (dateStr > todayStr || isBeforeDate(dateStr, activeHabit.createdAt)) {
         continue;
       }
-      
-      const jsDay = new Date(viewYear, viewMonth, day).getDay();
-      const isSkipDay = activeHabit.skipDays.includes(jsDay === 0 ? 6 : jsDay - 1);
+
+      const isSkipDay = isFixedSkipDay(activeHabit, dateStr);
       const isCompleted = activeHabit.completedDates.includes(dateStr);
-      
+      let isFlexSkipUsed = false;
+
+      if (!isCompleted && isFlexible) {
+        const weekStart = getWeekStart(dateStr);
+        const used = flexUsage.get(weekStart) || 0;
+        if (used < 1) {
+          flexUsage.set(weekStart, used + 1);
+          isFlexSkipUsed = true;
+        }
+      }
+
       if (isCompleted) {
         completionsCount++;
         activeDaysCount++;
-      } else if (!isSkipDay) {
+      } else if (!isSkipDay && !isFlexSkipUsed) {
         activeDaysCount++;
       }
     }
@@ -286,7 +297,7 @@ export default function MonthlyView() {
                   }
 
                   const isCompleted = activeHabit.completedDates.includes(cell.dateStr);
-                  const isSkipDay = activeHabit.skipDays.includes(cell.jsDayIndex);
+                  const isSkipDay = isFixedSkipDay(activeHabit, cell.dateStr);
                   const isInactive = isBeforeDate(cell.dateStr, activeHabit.createdAt);
                   
                   const canToggle = !cell.isFuture && !isInactive;

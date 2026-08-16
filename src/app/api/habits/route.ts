@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Database not connected" }, { status: 503 });
     }
     const body = await request.json();
-    const { name, description, skipDays, createdAt } = body;
+    const { name, description, skipDays, skipMode, createdAt } = body;
 
     if (!name) {
       return NextResponse.json({ error: "Habit name is required" }, { status: 400 });
@@ -41,10 +41,13 @@ export async function POST(request: Request) {
     const client = await clientPromise;
     const db = client.db("habit-tracker");
 
+    const resolvedSkipMode = skipMode === "flexible" ? "flexible" : "fixed";
+
     const newHabit = {
       name,
       description: description || "",
-      skipDays: Array.isArray(skipDays) ? skipDays : [],
+      skipDays: resolvedSkipMode === "flexible" ? [] : Array.isArray(skipDays) ? skipDays : [],
+      skipMode: resolvedSkipMode,
       createdAt: createdAt || new Date().toISOString().split("T")[0],
       completedDates: [],
     };

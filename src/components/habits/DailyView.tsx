@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useHabitStore } from "@/store/habit-store";
-import { Habit, calculateStreaks, getWeekdayIndex, isBeforeDate, getLocalDateString } from "@/lib/habit-utils";
+import { Habit, calculateStreaks, isFixedSkipDay, getFlexibleSkipStatus, isBeforeDate, getLocalDateString } from "@/lib/habit-utils";
 import { Flame, Check, PenLine, AlertCircle } from "lucide-react";
 
 interface DailyViewProps {
@@ -22,7 +22,7 @@ export default function DailyView({ onEditHabit }: DailyViewProps) {
   const totalCount = activeHabits.length;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-  const weekdayIndex = getWeekdayIndex(selectedDate);
+  const todayStr = getLocalDateString();
 
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 px-4 py-6 md:py-8">
@@ -47,9 +47,12 @@ export default function DailyView({ onEditHabit }: DailyViewProps) {
             <div className="flex flex-col gap-2.5">
               {activeHabits.map((habit) => {
                 const isCompleted = habit.completedDates.includes(selectedDate);
-                const isSkipDay = habit.skipDays.includes(weekdayIndex);
+                const isFlexible = habit.skipMode === "flexible";
+                const isSkipDay = isFlexible ? false : isFixedSkipDay(habit, selectedDate);
+                const flexStatus =
+                  isFlexible && selectedDate === todayStr ? getFlexibleSkipStatus(habit, todayStr) : null;
                 const { currentStreak } = calculateStreaks(habit, selectedDate);
-                const isFuture = selectedDate > getLocalDateString();
+                const isFuture = selectedDate > todayStr;
                 const isInactive = isBeforeDate(selectedDate, habit.createdAt);
                 const canToggle = !isFuture && !isInactive;
 
@@ -75,7 +78,7 @@ export default function DailyView({ onEditHabit }: DailyViewProps) {
                         } ${
                           isCompleted
                             ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black"
-                            : isSkipDay
+                            : isSkipDay || (flexStatus && flexStatus.remaining > 0)
                             ? "border-dashed border-zinc-400 dark:border-zinc-600 bg-transparent text-transparent hover:border-black dark:hover:border-white"
                             : "border-zinc-300 dark:border-zinc-700 bg-transparent text-transparent hover:border-black dark:hover:border-white"
                         }`}
@@ -116,6 +119,11 @@ export default function DailyView({ onEditHabit }: DailyViewProps) {
                         {isSkipDay && !isCompleted && (
                           <span className="text-[8px] md:text-[9px] font-semibold tracking-wide uppercase px-1 py-0.5 rounded border border-dashed border-zinc-300 dark:border-zinc-800 text-muted-text">
                             Skip Day
+                          </span>
+                        )}
+                        {flexStatus && !isCompleted && (
+                          <span className="text-[8px] md:text-[9px] font-semibold tracking-wide uppercase px-1 py-0.5 rounded border border-dashed border-zinc-300 dark:border-zinc-800 text-muted-text">
+                            {flexStatus.remaining > 0 ? "Flex Skip Available" : "Flex Skip Used"}
                           </span>
                         )}
                       </div>

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Habit, getLocalDateString } from "@/lib/habit-utils";
+import { Habit, SkipMode, getLocalDateString } from "@/lib/habit-utils";
 
 interface HabitState {
   habits: Habit[];
@@ -8,11 +8,11 @@ interface HabitState {
   dbConnected: boolean;
   selectedDate: string;
   activeTab: "daily" | "weekly" | "monthly" | "settings";
-  
+
   // Actions
   fetchHabits: () => Promise<void>;
-  addHabit: (name: string, description: string, skipDays: number[]) => Promise<void>;
-  updateHabit: (id: string, name: string, description: string, skipDays: number[]) => Promise<void>;
+  addHabit: (name: string, description: string, skipDays: number[], skipMode?: SkipMode) => Promise<void>;
+  updateHabit: (id: string, name: string, description: string, skipDays: number[], skipMode?: SkipMode) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
   toggleHabitCompletion: (id: string, date: string) => Promise<void>;
   setSelectedDate: (date: string) => void;
@@ -131,20 +131,20 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }
   },
 
-  addHabit: async (name, description, skipDays) => {
+  addHabit: async (name, description, skipDays, skipMode = "fixed") => {
     const { dbConnected } = get();
-    
+
     if (dbConnected) {
       try {
         const response = await fetch("/api/habits", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, description, skipDays }),
+          body: JSON.stringify({ name, description, skipDays, skipMode }),
         });
-        
+
         if (!response.ok) throw new Error("Failed to create habit");
         const data = await response.json();
-        
+
         set((state) => ({ habits: [...state.habits, data.habit] }));
       } catch (error) {
         console.error("Error creating habit, falling back to local:", error);
@@ -157,10 +157,11 @@ export const useHabitStore = create<HabitState>((set, get) => ({
           name,
           description,
           skipDays,
+          skipMode,
           createdAt: getLocalDateString(),
           completedDates: [],
         };
-        
+
         const updatedHabits = [...state.habits, newHabit];
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
         return { habits: updatedHabits };
@@ -168,20 +169,20 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }
   },
 
-  updateHabit: async (id, name, description, skipDays) => {
+  updateHabit: async (id, name, description, skipDays, skipMode = "fixed") => {
     const { dbConnected } = get();
-    
+
     if (dbConnected && !id.startsWith("local_")) {
       try {
         const response = await fetch(`/api/habits/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, description, skipDays }),
+          body: JSON.stringify({ name, description, skipDays, skipMode }),
         });
-        
+
         if (!response.ok) throw new Error("Failed to update habit");
         const data = await response.json();
-        
+
         set((state) => ({
           habits: state.habits.map((h) => (h._id === id ? data.habit : h)),
         }));
@@ -192,7 +193,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       // Local storage fallback
       set((state) => {
         const updatedHabits = state.habits.map((h) =>
-          h._id === id ? { ...h, name, description, skipDays } : h
+          h._id === id ? { ...h, name, description, skipDays, skipMode } : h
         );
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHabits));
         return { habits: updatedHabits };

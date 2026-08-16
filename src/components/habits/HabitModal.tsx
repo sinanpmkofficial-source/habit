@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useHabitStore } from "@/store/habit-store";
-import { Habit } from "@/lib/habit-utils";
+import { Habit, SkipMode } from "@/lib/habit-utils";
 import { X, Trash2 } from "lucide-react";
 
 interface HabitModalProps {
@@ -27,6 +27,7 @@ export default function HabitModal({ isOpen, onClose, habit }: HabitModalProps) 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [skipDays, setSkipDays] = useState<number[]>([]);
+  const [skipMode, setSkipMode] = useState<SkipMode>("fixed");
   const [error, setError] = useState("");
 
   // Sync state with habit prop when opening/changing
@@ -35,10 +36,12 @@ export default function HabitModal({ isOpen, onClose, habit }: HabitModalProps) 
       setName(habit.name);
       setDescription(habit.description || "");
       setSkipDays(habit.skipDays || []);
+      setSkipMode(habit.skipMode || "fixed");
     } else {
       setName("");
       setDescription("");
       setSkipDays([]);
+      setSkipMode("fixed");
     }
     setError("");
   }, [habit, isOpen]);
@@ -61,10 +64,11 @@ export default function HabitModal({ isOpen, onClose, habit }: HabitModalProps) 
     }
 
     try {
+      const effectiveSkipDays = skipMode === "flexible" ? [] : skipDays;
       if (habit && habit._id) {
-        await updateHabit(habit._id, name.trim(), description.trim(), skipDays);
+        await updateHabit(habit._id, name.trim(), description.trim(), effectiveSkipDays, skipMode);
       } else {
-        await addHabit(name.trim(), description.trim(), skipDays);
+        await addHabit(name.trim(), description.trim(), effectiveSkipDays, skipMode);
       }
       onClose();
     } catch (err: any) {
@@ -142,34 +146,68 @@ export default function HabitModal({ isOpen, onClose, habit }: HabitModalProps) 
             />
           </div>
 
-          {/* Skip Days */}
+          {/* Skip Mode */}
           <div className="flex flex-col">
             <label className="text-[10px] uppercase font-bold tracking-wider text-muted-text mb-1.5">
               Skip Days
             </label>
-            <p className="text-[10px] text-muted-text mb-2.5">
-              Select days you don't want to track. They won't break your streak if left incomplete.
-            </p>
-            <div className="flex justify-between items-center bg-muted-bg/50 dark:bg-muted-bg/10 rounded-2xl p-3 border border-border">
-              {WEEKDAYS.map((day) => {
-                const isSkipped = skipDays.includes(day.index);
-                return (
-                  <button
-                    type="button"
-                    key={day.index}
-                    onClick={() => handleToggleSkipDay(day.index)}
-                    title={`Skip ${day.name}`}
-                    className={`btn-interactive w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border transition-all ${
-                      isSkipped
-                        ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 text-muted-text hover:border-black dark:hover:border-white"
-                    }`}
-                  >
-                    {day.label}
-                  </button>
-                );
-              })}
+            <div className="flex gap-2 mb-2.5">
+              <button
+                type="button"
+                onClick={() => setSkipMode("fixed")}
+                className={`btn-interactive flex-1 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all ${
+                  skipMode === "fixed"
+                    ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-sm"
+                    : "border-border text-muted-text hover:border-black dark:hover:border-white"
+                }`}
+              >
+                Fixed Days
+              </button>
+              <button
+                type="button"
+                onClick={() => setSkipMode("flexible")}
+                className={`btn-interactive flex-1 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all ${
+                  skipMode === "flexible"
+                    ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-sm"
+                    : "border-border text-muted-text hover:border-black dark:hover:border-white"
+                }`}
+              >
+                Flexible (1/week)
+              </button>
             </div>
+
+            {skipMode === "fixed" ? (
+              <>
+                <p className="text-[10px] text-muted-text mb-2.5">
+                  Select days you don't want to track. They won't break your streak if left incomplete.
+                </p>
+                <div className="flex justify-between items-center bg-muted-bg/50 dark:bg-muted-bg/10 rounded-2xl p-3 border border-border">
+                  {WEEKDAYS.map((day) => {
+                    const isSkipped = skipDays.includes(day.index);
+                    return (
+                      <button
+                        type="button"
+                        key={day.index}
+                        onClick={() => handleToggleSkipDay(day.index)}
+                        title={`Skip ${day.name}`}
+                        className={`btn-interactive w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border transition-all ${
+                          isSkipped
+                            ? "bg-black border-black text-white dark:bg-white dark:border-white dark:text-black shadow-sm"
+                            : "border-zinc-200 dark:border-zinc-800 text-muted-text hover:border-black dark:hover:border-white"
+                        }`}
+                      >
+                        {day.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <p className="text-[10px] text-muted-text bg-muted-bg/50 dark:bg-muted-bg/10 rounded-2xl p-3 border border-border">
+                No specific day is set aside. Any single day you miss during a Mon–Sun week
+                won&apos;t break your streak — but a second miss in the same week will.
+              </p>
+            )}
           </div>
 
           {/* Hidden submit trigger */}
